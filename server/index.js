@@ -2,7 +2,11 @@ var FS = require('fs');
 var Express = require('express');
 var PreactSSR = require('preact-render-to-string');
 var ClientApp = require('./client/app');
+
+// Make fetch() available to app and enable DNS caching
 global.fetch = require('cross-fetch');
+var DNSCache = require('dnscache');
+DNSCache({ enable: true, ttl: 300, cachesize: 100 });
 
 var app = Express();
 app.use('/starwars', Express.static(`${__dirname}/www`));
