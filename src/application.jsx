@@ -50,6 +50,9 @@ class Application extends Component {
         let { routeManager, dataSource } = this.props;
         routeManager.addEventListener('change', this.handleRouteChange);
         dataSource.addEventListener('change', this.handleDataSourceChange);
+
+        var body = document.body;
+        body.className = body.className.replace(/\s*ssr/, '');
     }
 
     /**

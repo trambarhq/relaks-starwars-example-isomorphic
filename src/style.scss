@@ -1,6 +1,10 @@
 BODY {
     font-family: sans-serif;
     margin: 0;
+
+    &.ssr {
+        background-color: #ffcccc;
+    }
 }
 
 .contents {

@@ -7,14 +7,16 @@ var NamedChunksPlugin = Webpack.NamedChunksPlugin;
 var NamedModulesPlugin = Webpack.NamedModulesPlugin;
 var UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 var event = process.env.npm_lifecycle_event;
 
-module.exports = {
+var clientConfig = {
     context: Path.resolve('./src'),
     entry: './main',
     output: {
-        path: Path.resolve('./www'),
+        path: Path.resolve('./server/www'),
+        publicPath: '/starwars/',
         filename: 'app.js',
     },
     resolve: {
@@ -43,69 +45,81 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                loader: 'css-loader'
+                use: ExtractTextPlugin.extract({
+                    use: 'css-loader',
+                })
             },
             {
                 test: /\.scss$/,
-                use: [
-                    'style-loader',
-                    'css-loader',
-                    'sass-loader'
-                ]
+                use: ExtractTextPlugin.extract({
+                    use: 'css-loader!sass-loader',
+                })
             },
         ]
     },
     plugins: [
         new NamedChunksPlugin,
         new NamedModulesPlugin,
-        new HtmlWebpackPlugin({
-            template: Path.resolve(`./src/index.html`),
-            filename: Path.resolve(`./www/index.html`),
-        }),
         new BundleAnalyzerPlugin({
             analyzerMode: (event === 'build') ? 'static' : 'disabled',
             reportFilename: `report.html`,
         }),
+        new ExtractTextPlugin("styles.css"),
     ],
     devtool: (event === 'build') ? false : 'inline-source-map',
-    devServer: {
-        inline: true,
-        historyApiFallback: {
-            rewrites: [
-                {
-                    from: /.*/,
-                    to: function(context) {
-                        return context.parsedUrl.pathname.replace(/.*\/(.*)$/, '/$1');
-                    }
-                }
-            ]
-        }
-    }
 };
+
+var serverConfig = {
+    context: clientConfig.context,
+    entry: clientConfig.entry,
+    target: 'node',
+    output: {
+        path: Path.resolve('./server/client'),
+        filename: 'app.js',
+        libraryTarget: 'commonjs2',
+        publicPath: '/starwars',
+    },
+    resolve: clientConfig.resolve,
+    module: clientConfig.module,
+    plugins: [
+        new NamedChunksPlugin,
+        new NamedModulesPlugin,
+        new HtmlWebpackPlugin({
+            template: Path.resolve(`./src/index.html`),
+            filename: Path.resolve(`./server/client/index.html`),
+        }),
+        new ExtractTextPlugin('styles.css'),
+    ],
+    devtool: clientConfig.devtool,
+};
+
+var configs = module.exports = [ serverConfig, clientConfig ];
 
 var constants = {};
 if (event === 'build') {
     console.log('Optimizing JS code');
 
-    // set NODE_ENV to production
-    var plugins = module.exports.plugins;
-    var constants = {
-        'process.env.NODE_ENV': '"production"',
-    };
-    plugins.unshift(new DefinePlugin(constants));
+    configs.forEach((config) => {
+        // set NODE_ENV to production
+        var plugins = config.plugins;
+        var constants = {
+            'process.env.NODE_ENV': '"production"',
+        };
+        plugins.unshift(new DefinePlugin(constants));
 
-    // use Uglify to remove dead-code
-    plugins.unshift(new UglifyJSPlugin({
-        uglifyOptions: {
-            compress: {
-              drop_console: true,
+        // use Uglify to remove dead-code
+        plugins.unshift(new UglifyJSPlugin({
+            uglifyOptions: {
+                compress: {
+                  drop_console: true,
+                }
             }
-        }
-    }));
+        }));
+    })
 }
 
 // copy webpack.resolve.js into webpack.debug.js to resolve Babel presets
 // and plugins to absolute paths, required when linked modules are used
 if (FS.existsSync('./webpack.debug.js')) {
-    require('./webpack.debug.js')(module.exports);
+    configs.map(require('./webpack.debug.js'));
 }
