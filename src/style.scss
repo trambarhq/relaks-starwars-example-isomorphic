@@ -1,0 +1,75 @@
+BODY {
+    font-family: sans-serif;
+    margin: 0;
+}
+
+.contents {
+    margin: 0.5em;
+}
+
+A {
+    &:link, &:visited {
+        text-decoration: none;
+        color: #000;
+    }
+
+    &:hover {
+        text-decoration: underline;
+        color: #f11;
+    }
+}
+
+.nav-bar {
+    background-color: #000;
+    color: #fff;
+    font-size: 1.1em;
+    font-weight: bold;
+
+    .button {
+        display: inline-block;
+        padding: 0.35em 0.5em 0.20em 0.5em;
+        border-right: 1px solid #fff;
+
+        &:link, &:visited {
+            color: #fff;
+        }
+
+        &:hover {
+            text-decoration: none;
+            color: #f11;
+        }
+
+        .fa-empire {
+            font-weight: normal;
+        }
+
+    }
+}
+
+.pending {
+    color: #aaa;
+    cursor: wait;
+}
+
+.empty {
+    color: #999;
+}
+
+.loading {
+    position: fixed;
+    left: 2em;
+    right: 2em;
+    top: 2em;
+    bottom: 2em;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    animation: fadein 1s;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
