@@ -15,7 +15,7 @@ class Application extends Component {
         let { routeManager, dataSource } = this.props;
         this.state = {
             route: new Route(routeManager),
-            swapi: new SWAPI(dataSource),
+            swapi: new SWAPI(dataSource, props.ssr),
         };
     }
 

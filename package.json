@@ -47,6 +47,7 @@
     "cross-fetch": "^2.2.2",
     "dnscache": "^1.0.1",
     "express": "^4.16.3",
-    "preact-render-to-string": "^3.8.2"
+    "preact-render-to-string": "^3.8.2",
+    "spider-detector": "^1.0.18"
   }
 }

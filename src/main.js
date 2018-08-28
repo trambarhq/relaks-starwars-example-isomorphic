@@ -48,7 +48,7 @@ if (typeof(window) === 'object') {
         });
         await routeManager.initialize();
 
-        let appElement = h(Application, { dataSource, routeManager });
+        let appElement = h(Application, { dataSource, routeManager, ssr: options.target });
         return harvest(appElement);
     }
 

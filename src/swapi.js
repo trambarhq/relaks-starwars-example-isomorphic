@@ -2,8 +2,9 @@ class SWAPI {
     /**
      * Remember the data source
      */
-    constructor(dataSource) {
+    constructor(dataSource, ssr) {
         this.dataSource = dataSource;
+        this.ssr = ssr;
     }
 
     /**
@@ -27,6 +28,9 @@ class SWAPI {
      * @return {Promise<Array>}
      */
     fetchList(url, options) {
+        if (this.ssr === 'seo') {
+            options = Object.assign({}, options, { minimum: '100%' });
+        }
         return this.dataSource.fetchList(url, options);
     }
 
@@ -39,6 +43,9 @@ class SWAPI {
      * @return {Promise<Array>}
      */
     fetchMultiple(urls, options) {
+        if (this.ssr === 'seo') {
+            options = Object.assign({}, options, { minimum: '100%' });
+        }
         return this.dataSource.fetchMultiple(urls, options);
     }
 }

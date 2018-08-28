@@ -1,5 +1,6 @@
 var FS = require('fs');
 var Express = require('express');
+var SpiderDetector = require('spider-detector')
 var PreactSSR = require('preact-render-to-string');
 var ClientApp = require('./client/app');
 
@@ -9,16 +10,52 @@ var DNSCache = require('dnscache');
 DNSCache({ enable: true, ttl: 300, cachesize: 100 });
 
 var host = `http://localhost:8080`;
-var perPage = 25;
+var perPage = 10;
 var apiBaseURL = `${host}/starwars/api`;
 
 var app = Express();
 app.set('json spaces', 2);
+app.use(SpiderDetector.middleware());
 app.use('/starwars', Express.static(`${__dirname}/www`));
 app.get('/starwars/api/:table/:id/', handleObjectRequest);
 app.get('/starwars/api/:table/', handleListRequest);
 app.get('/starwars/*', handlePageRequest);
 app.listen(8080);
+
+function handlePageRequest(req, res) {
+    var path = req.url;
+    var noScript = (req.query.js === '0')
+    var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
+    var options = { host, path, target };
+    ClientApp.render(options).then((rootNode) => {
+        var appHTML = PreactSSR.render(rootNode);
+        var indexHTMLPath = `${__dirname}/client/index.html`;
+        if (target === 'hydrate') {
+            // add <noscript> tag to redirect to SEO version
+            var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
+            appHTML += `<noscript>${meta}</noscript>`;
+        }
+        return replaceHTMLComment(indexHTMLPath, 'APP', appHTML).then((html) => {
+            res.type('html').send(html);
+        });
+    }).catch((err) => {
+        handleRequestError(res, err);
+    });
+}
+
+function replaceHTMLComment(path, comment, newElement) {
+    return new Promise((resolve, reject) => {
+        FS.readFile(path, 'utf-8', (err, text) => {
+            if (!err) {
+                var tag = `<!--${comment}-->`;
+                var result = text.replace(tag, newElement);
+                resolve(result);
+            } else {
+                reject(err);
+            }
+        });
+    });
+}
 
 function handleObjectRequest(req, res) {
     var id = parseInt(req.params.id);
@@ -49,21 +86,6 @@ function handleListRequest(req, res) {
         var prev = (page > 1) ? getPageURL(table, page - 1) : null;
         var results = slice.map(attachHyperlinkKeys.bind(null, table));
         res.json({ count, next, prev, results });
-    }).catch((err) => {
-        handleRequestError(res, err);
-    });
-}
-
-function handlePageRequest(req, res) {
-    var target = 'hydrate';
-    var path = req.url;
-    var options = { host, path, target };
-    ClientApp.render(options).then((rootNode) => {
-        var appHTML = PreactSSR.render(rootNode);
-        var indexHTMLPath = `${__dirname}/client/index.html`;
-        return replaceHTMLComment(indexHTMLPath, 'APP', appHTML).then((html) => {
-            res.type('html').send(html);
-        });
     }).catch((err) => {
         handleRequestError(res, err);
     });
@@ -133,18 +155,4 @@ function attachHyperlinkKeys(table, object) {
         }
     }
     return newObject;
-}
-
-function replaceHTMLComment(path, comment, newElement) {
-    return new Promise((resolve, reject) => {
-        FS.readFile(path, 'utf-8', (err, text) => {
-            if (!err) {
-                var tag = `<!--${comment}-->`;
-                var result = text.replace(tag, newElement);
-                resolve(result);
-            } else {
-                reject(err);
-            }
-        });
-    });
 }
