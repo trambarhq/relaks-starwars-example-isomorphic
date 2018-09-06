@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
 import SWAPI from 'swapi';
-import { Route } from 'routes';
+import { Route } from 'routing';
 import NavBar from 'widgets/nav-bar';
 import 'relaks/preact';
 import 'style.scss';

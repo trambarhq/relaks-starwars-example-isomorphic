@@ -1,7 +1,7 @@
 import 'preact/devtools';
 import { h, render } from 'preact';
 import { Application } from 'application';
-import { routes } from 'routes';
+import { routes } from 'routing';
 import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest/preact';
@@ -15,14 +15,15 @@ if (typeof(window) === 'object') {
         let dataSource = new DjangoDataSource({
             baseURL: dataSourceBaseURL,
         });
-        await dataSource.initialize();
+        dataSource.activate();
 
         // create route manager
         let routeManager = new RouteManager({
             routes,
             basePath: pageBasePath,
         });
-        await routeManager.initialize();
+        routeManager.activate();
+        await routeManager.start();
 
         let appContainer = document.getElementById('app-container');
         if (!appContainer) {
@@ -39,14 +40,14 @@ if (typeof(window) === 'object') {
         let dataSource = new DjangoDataSource({
             baseURL: `${options.host}${dataSourceBaseURL}`,
         });
-        await dataSource.initialize();
+        dataSource.activate();
 
         let routeManager = new RouteManager({
             routes,
             basePath: pageBasePath,
-            initialPath: options.path,
         });
-        await routeManager.initialize();
+        routeManager.activate();
+        await routeManager.start(options.path);
 
         let appElement = h(Application, { dataSource, routeManager, ssr: options.target });
         return harvest(appElement);
