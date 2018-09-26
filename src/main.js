@@ -6,14 +6,15 @@ import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest/preact';
 
-var dataSourceBaseURL = '/starwars/api';
-var pageBasePath = '/starwars';
+const dataSourceBaseURL = '/starwars/api';
+const pageBasePath = '/starwars';
 
 if (typeof(window) === 'object') {
     async function initialize(evt) {
         // create data source
+        let host = `${location.protocol}//${location.host}`;
         let dataSource = new DjangoDataSource({
-            baseURL: dataSourceBaseURL,
+            baseURL: `${host}${dataSourceBaseURL}`,
         });
         dataSource.activate();
 
@@ -29,8 +30,9 @@ if (typeof(window) === 'object') {
         if (!appContainer) {
             throw new Error('Unable to find app element in DOM');
         }
+        let ssrElement = h(Application, { dataSource, routeManager, ssr: 'hydrate' });
+        await harvest(ssrElement);
         let appElement = h(Application, { dataSource, routeManager });
-        await harvest(appElement);
         render(appElement, appContainer, appContainer.firstChild);
     }
 
@@ -49,8 +51,8 @@ if (typeof(window) === 'object') {
         routeManager.activate();
         await routeManager.start(options.path);
 
-        let appElement = h(Application, { dataSource, routeManager, ssr: options.target });
-        return harvest(appElement);
+        let ssrElement = h(Application, { dataSource, routeManager, ssr: options.target });
+        return harvest(ssrElement);
     }
 
     exports.render = serverSideRender;
