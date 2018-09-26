@@ -24,9 +24,9 @@ class StarshipPage extends AsyncComponent {
         meanwhile.show(<StarshipPageSync {...props} />);
         props.starship = await swapi.fetchOne(`/starships/${route.params.id}/`);
         meanwhile.show(<StarshipPageSync {...props} />);
-        props.films = await swapi.fetchMultiple(props.starship.films, { partial: 0.4 });
+        props.films = await swapi.fetchMultiple(props.starship.films, { minimum: '60%' });
         meanwhile.show(<StarshipPageSync {...props} />);
-        props.pilots = await swapi.fetchMultiple(props.starship.pilots, { partial: 0.4 });
+        props.pilots = await swapi.fetchMultiple(props.starship.pilots, { minimum: '60%' });
         return <StarshipPageSync {...props} />;
     }
 }

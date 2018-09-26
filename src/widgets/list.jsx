@@ -36,7 +36,7 @@ function List(props) {
                     href: url,
                     className: (item.pending) ? 'pending' : undefined,
                 };
-                return <li><a {...linkProps}>{text}</a></li>;
+                return <li key={id}><a {...linkProps}>{text}</a></li>;
             })
         }
         </ul>
