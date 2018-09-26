@@ -1,9 +1,7 @@
-import { h, Component } from 'preact';
-import { AsyncComponent } from 'relaks/preact';
+import React, { PureComponent } from 'react';
+import { AsyncComponent } from 'relaks';
 import { List } from 'widgets/list';
 import Loading from 'widgets/loading';
-
-/** @jsx h */
 
 class FilmPage extends AsyncComponent {
     static displayName = 'FilmPage';
@@ -42,7 +40,7 @@ class FilmPage extends AsyncComponent {
     }
 }
 
-class FilmPageSync extends Component {
+class FilmPageSync extends PureComponent {
     static displayName = 'FilmPageSync';
 
     /**

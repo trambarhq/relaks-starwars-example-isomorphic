@@ -1,9 +1,7 @@
-import { h, Component } from 'preact';
-import { AsyncComponent } from 'relaks/preact';
+import React, { PureComponent } from 'react';
+import { AsyncComponent } from 'relaks';
 import { List } from 'widgets/list';
 import Loading from 'widgets/loading';
-
-/** @jsx h */
 
 class PlanetPage extends AsyncComponent {
     static displayName = 'PlanetPage';
@@ -34,7 +32,7 @@ class PlanetPage extends AsyncComponent {
     }
 }
 
-class PlanetPageSync extends Component {
+class PlanetPageSync extends PureComponent {
     static displayName = 'PlanetPageSync';
 
     /**

@@ -1,10 +1,10 @@
-import 'preact/devtools';
-import { h, render } from 'preact';
+import { createElement } from 'react';
+import { hydrate } from 'react-dom';
 import { Application } from 'application';
 import { routes } from 'routing';
 import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
-import { harvest } from 'relaks-harvest/preact';
+import { harvest } from 'relaks-harvest';
 
 var dataSourceBaseURL = '/starwars/api';
 var pageBasePath = '/starwars';
@@ -29,9 +29,9 @@ if (typeof(window) === 'object') {
         if (!appContainer) {
             throw new Error('Unable to find app element in DOM');
         }
-        let appElement = h(Application, { dataSource, routeManager });
+        let appElement = createElement(Application, { dataSource, routeManager });
         await harvest(appElement);
-        render(appElement, appContainer, appContainer.firstChild);
+        hydrate(appElement, appContainer);
     }
 
     window.addEventListener('load', initialize);
@@ -49,7 +49,7 @@ if (typeof(window) === 'object') {
         routeManager.activate();
         await routeManager.start(options.path);
 
-        let appElement = h(Application, { dataSource, routeManager, ssr: options.target });
+        let appElement = createElement(Application, { dataSource, routeManager, ssr: options.target });
         return harvest(appElement);
     }
 

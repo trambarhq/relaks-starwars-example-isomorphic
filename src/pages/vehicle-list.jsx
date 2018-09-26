@@ -1,9 +1,7 @@
-import { h, Component } from 'preact';
-import { AsyncComponent } from 'relaks/preact';
+import React, { PureComponent } from 'react';
+import { AsyncComponent } from 'relaks';
 import List from 'widgets/list';
 import Loading from 'widgets/loading';
-
-/** @jsx h */
 
 class VehicleList extends AsyncComponent {
     static displayName = 'VehicleList';
@@ -28,7 +26,7 @@ class VehicleList extends AsyncComponent {
     }
 }
 
-class VehicleListSync extends Component {
+class VehicleListSync extends PureComponent {
     static displayName = 'VehicleListSync';
 
     /**

@@ -1,10 +1,8 @@
-import { h, render, Component } from 'preact';
+import React, { PureComponent } from 'react';
 
-/** @jsx h */
-
-class WelcomePage extends Component {
+class WelcomePage extends PureComponent {
     static displayName = 'WelcomePage';
-    
+
     /**
      * Render the component
      *

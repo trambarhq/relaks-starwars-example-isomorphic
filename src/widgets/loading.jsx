@@ -1,6 +1,4 @@
-import { h, Component } from 'preact';
-
-/** @jsx h */
+import React from 'react';
 
 function Loading() {
     return (

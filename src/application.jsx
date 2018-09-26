@@ -1,13 +1,11 @@
-import { h, Component } from 'preact';
+import React, { PureComponent } from 'react';
 import SWAPI from 'swapi';
 import { Route } from 'routing';
 import NavBar from 'widgets/nav-bar';
-import 'relaks/preact';
+import 'relaks';
 import 'style.scss';
 
-/** @jsx h */
-
-class Application extends Component {
+class Application extends PureComponent {
     static displayName = 'Application';
 
     constructor(props) {

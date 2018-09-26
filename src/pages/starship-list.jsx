@@ -1,9 +1,7 @@
-import { h, Component } from 'preact';
-import { AsyncComponent } from 'relaks/preact';
+import React, { PureComponent } from 'react';
+import { AsyncComponent } from 'relaks';
 import List from 'widgets/list';
 import Loading from 'widgets/loading';
-
-/** @jsx h */
 
 class StarshipList extends AsyncComponent {
     static displayName = 'StarshipList';
@@ -28,7 +26,7 @@ class StarshipList extends AsyncComponent {
     }
 }
 
-class StarshipListSync extends Component {
+class StarshipListSync extends PureComponent {
     static displayName = 'StarshipListSync';
 
     /**

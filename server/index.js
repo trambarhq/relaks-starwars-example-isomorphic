@@ -1,7 +1,7 @@
 var FS = require('fs');
 var Express = require('express');
 var SpiderDetector = require('spider-detector')
-var PreactSSR = require('preact-render-to-string');
+var ReactDOMServer = require('react-dom/server');
 var ClientApp = require('./client/app');
 
 // Make fetch() available to app and enable DNS caching
@@ -28,7 +28,7 @@ function handlePageRequest(req, res) {
     var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
     var options = { host, path, target };
     ClientApp.render(options).then((rootNode) => {
-        var appHTML = PreactSSR.render(rootNode);
+        var appHTML = ReactDOMServer.renderToString(rootNode);
         var indexHTMLPath = `${__dirname}/client/index.html`;
         if (target === 'hydrate') {
             // add <noscript> tag to redirect to SEO version
