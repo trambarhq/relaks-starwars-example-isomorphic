@@ -26,9 +26,9 @@ class PlanetPage extends AsyncComponent {
         meanwhile.show(<PlanetPageSync {...props} />);
         props.planet = await swapi.fetchOne(`/planets/${route.params.id}/`);
         meanwhile.show(<PlanetPageSync {...props} />);
-        props.films = await swapi.fetchMultiple(props.planet.films, { partial: 0.4 });
+        props.films = await swapi.fetchMultiple(props.planet.films, { minimum: '60%' });
         meanwhile.show(<PlanetPageSync {...props} />);
-        props.residents = await swapi.fetchMultiple(props.planet.residents, { partial: 0.4 });
+        props.residents = await swapi.fetchMultiple(props.planet.residents, { minimum: '60%' });
         meanwhile.show(<PlanetPageSync {...props} />);
         return <PlanetPageSync {...props} />;
     }

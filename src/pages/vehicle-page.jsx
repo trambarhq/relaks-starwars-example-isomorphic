@@ -26,9 +26,9 @@ class VehiclePage extends AsyncComponent {
         meanwhile.show(<VehiclePageSync {...props} />);
         props.vehicle = await swapi.fetchOne(`/vehicles/${route.params.id}/`);
         meanwhile.show(<VehiclePageSync {...props} />);
-        props.films = await swapi.fetchMultiple(props.vehicle.films, { partial: 0.4 });
+        props.films = await swapi.fetchMultiple(props.vehicle.films, { minimum: '60%' });
         meanwhile.show(<VehiclePageSync {...props} />);
-        props.pilots = await swapi.fetchMultiple(props.vehicle.pilots, { partial: 0.4 });
+        props.pilots = await swapi.fetchMultiple(props.vehicle.pilots, { minimum: '60%' });
         meanwhile.show(<VehiclePageSync {...props} />);
         return <VehiclePageSync {...props} />;
     }

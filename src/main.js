@@ -22,6 +22,7 @@ if (typeof(window) === 'object') {
         let routeManager = new RouteManager({
             routes,
             basePath: pageBasePath,
+            preloadingDelay: 2000,
         });
         routeManager.activate();
         await routeManager.start();

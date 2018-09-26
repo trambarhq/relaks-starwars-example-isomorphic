@@ -27,9 +27,9 @@ class SpeciesPage extends AsyncComponent {
         meanwhile.show(<SpeciesPageSync {...props} />);
         props.species = await swapi.fetchOne(`/species/${route.params.id}/`);
         meanwhile.show(<SpeciesPageSync {...props} />);
-        props.films = await swapi.fetchMultiple(props.species.films, { partial: 0.4 });
+        props.films = await swapi.fetchMultiple(props.species.films, { minimum: '60%' });
         meanwhile.show(<SpeciesPageSync {...props} />);
-        props.people = await swapi.fetchMultiple(props.species.people, { partial: 0.4 });
+        props.people = await swapi.fetchMultiple(props.species.people, { minimum: '60%' });
         meanwhile.show(<SpeciesPageSync {...props} />);
         props.homeworld = await swapi.fetchOne(props.species.homeworld);
         return <SpeciesPageSync {...props} />;
