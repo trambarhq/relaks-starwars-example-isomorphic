@@ -1,1 +1,300 @@
-# relaks-starwars-example-isomorphic
+# Relaks Star Wars Example - Isomorphic
+
+This is part three of the Relaks Starwars example. In [part one](https://github.com/chung-leong/relaks-starwars-example),
+we created a very basic page that fetch data from [SWAPI](https://swapi.co/).
+In [part two](https://github.com/chung-leong/relaks-starwars-example-sequel),
+we expanded it to something that resembles a real-world website. Now, we'll go
+one step further by making the app isomorphic.
+
+An isomorphic React app can render a page on either a web browser or on a
+server running Node.js. The purpose of server-side rendering (SSR) is first and
+foremost search engine optimization (SEO). Website crawlers are much better at
+indexing static HTML pages than single-page JavaScript apps. Providing a static
+version of your site improves the chance that people will find it.
+
+SSR can also significantly reduce your site's time-to-first-impression. On this
+matrix, single-page JavaScript apps are often quite poor. The size of a modern
+JavaScript app can easily exceed 1MB, depending on what libraries are used. And
+after the app itself loads, it needs to retrieve the data that it needs to
+generate a page. That could take seconds, during which the impatient among your
+visitors might hit the back button. SSR allows you to show them the initial
+appearance of your app instead of a boring loading screen.
+
+This SSR page is completely static--it's just HTML. Unless the visitor has
+super-human reflex though, he wouldn't be able to tell. By the time he
+initiates the first interaction with the page, the app would likely be ready
+to handle it. Because the same code is used for both SSR and CSR, the
+transition from one to the other is seamless.
+
+With proper page caching, time-to-first-impression can easily drop below 50ms.
+
+## SSR and Relaks
+
+Conceptually, enabling SSR on an app using Relaks is very simple: We just need
+to wait for all promises returned by `renderAsync()` to be fulfilled. The
+[relaks-harvest](https://github.com/chung-leong/relaks-harvest) library is
+designed exactly for this task. Given a *ReactElement* (or Preact
+*VNode*), `harvest()` will recursively call either `renderAsync()` or
+`render()`.  Once everything is rendered, it asynchronously returns a tree
+containing only HTML and text nodes. This tree can then be passed to
+[`ReactDOMServer.renderToString()`](https://reactjs.org/docs/react-dom-server.html#rendertostring)
+(or [preact-render-to-string](https://github.com/developit/preact-render-to-string)).
+
+## Adjustments to WebPack configuration
+
+The first thing we need to do to enable SSR is to add a new build target in
+our WebPack configuration. By default, WebPack generates code suitable for
+browsers. We need ask WebPack to prepare a separate build for an Node.js
+environment. In [webpack.config.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/webpack.config.js#L96),
+we change the export statement to the following:
+
+```javascript
+module.exports = [ serverConfig, clientConfig ];
+```
+
+The variable `clientConfig` holds the configuration for the client build.
+The variable `serverConfig` meanwhile holds the configuration for the server
+build:
+
+```JavaScript
+var serverConfig = {
+    context: clientConfig.context,
+    entry: clientConfig.entry,
+    target: 'node',
+    output: {
+        path: Path.resolve('./server/client'),
+        filename: 'app.js',
+        libraryTarget: 'commonjs2',
+        publicPath: '/starwars',
+    },
+    resolve: clientConfig.resolve,
+    module: clientConfig.module,
+    plugins: [
+        new NamedChunksPlugin,
+        new NamedModulesPlugin,
+        new HtmlWebpackPlugin({
+            template: Path.resolve(`./src/index.html`),
+            filename: Path.resolve(`./server/client/index.html`),
+        }),
+        new ExtractTextPlugin('styles.css'),
+    ],
+    devtool: clientConfig.devtool,
+};
+```
+
+The most notable difference is the specification of `node` as the target. The
+output options are also different. We save the output files to `server/client`.
+Our Node.js code will be reading from this directory. We also have to specify
+`commonjs2`, the format used by Node.js, as the library target. For reasons
+unknown, this is not done automatically.
+
+Another thing we need to do is extract CSS rules to a separate .css file
+instead of loading them through JavaScript. It's a common task that was
+omitted from the earlier examples. WebPack's [Extract Text Plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin)
+is used for this purpose.
+
+### Client-side code changes
+
+The source file [main.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/src/main.js)
+serves as our app's entry point. In the previous examples, all it does is
+render the `Application` component into a DIV in the DOM. To support SSR,
+we need to make the code behave different when it's running on the server.
+When the `window` object is absent, the following code path is used:
+
+```javascript
+async function serverSideRender(options) {
+    let dataSource = new DjangoDataSource({
+        baseURL: `${options.host}${dataSourceBaseURL}`,
+    });
+    dataSource.activate();
+
+    let routeManager = new RouteManager({
+        routes,
+        basePath: pageBasePath,
+    });
+    routeManager.activate();
+    await routeManager.start(options.path);
+
+    let ssrElement = h(Application, { dataSource, routeManager, ssr: options.target });
+    return harvest(ssrElement);
+}
+
+exports.render = serverSideRender;
+```
+
+The function above is called from Node.js. It first initiates the data source
+and route manager, using options provided by the server-side code. Then it
+creates the `Application` element. This is given to `harvest()`, whose
+return value is a promise of the eventual results.
+
+On the client-side, we call `RouteManager.start()` without any argument,
+as the current URL can be obtained from the `location` object. On the
+server-side, we need to call it with the desired path.
+
+The `ssr` prop given to `Application` has two possible values: `seo`
+and `hydrate`. It let the app make adjustments based on whether it's
+generating HTML for SEO. The `fetchList()` and `fetchMultiple()` methods are
+modified as follows:
+
+```javascript
+fetchList(url, options) {
+    if (this.ssr === 'seo') {
+        options = Object.assign({}, options, { minimum: '100%' });
+    }
+    return this.dataSource.fetchList(url, options);
+}
+
+fetchMultiple(urls, options) {
+    if (this.ssr === 'seo') {
+        options = Object.assign({}, options, { minimum: '100%' });
+    }
+    return this.dataSource.fetchMultiple(urls, options);
+}
+```
+
+When we're optimizing for search, we place all available contents into the
+static page. When we're optimizing for time-to-first-impression, we only
+load a single page of data, presumably enough to fill the screen.
+
+When the `window` object is present, the app is running in a web-browser.
+The following code path is used instead:
+
+```javascript
+async function initialize(evt) {
+    let host = `${location.protocol}//${location.host}`;
+    let dataSource = new DjangoDataSource({
+        baseURL: `${host}${dataSourceBaseURL}`,
+    });
+    dataSource.activate();
+
+    let routeManager = new RouteManager({
+        routes,
+        basePath: pageBasePath,
+        preloadingDelay: 2000,
+    });
+    routeManager.activate();
+    await routeManager.start();
+
+    let appContainer = document.getElementById('app-container');
+    if (!appContainer) {
+        throw new Error('Unable to find app element in DOM');
+    }
+    let ssrElement = h(Application, { dataSource, routeManager, ssr: 'hydrate' });
+    await harvest(ssrElement);
+    let appElement = h(Application, { dataSource, routeManager });
+    render(appElement, appContainer, appContainer.firstChild);
+}
+
+window.addEventListener('load', initialize);
+```
+
+The code is almost the same before. The critical addition here is the call
+to `harvest()`. Even though we have no need to generate HTML, performing
+the operation causes the data required by the initial rendering to be pulled
+into the cache of `DjangoDataSource`. When we render the application "for real",
+queries for data will succeed immediately.
+
+In the first `Application` element, `ssr` is set to `hydrate`, matching
+what was done on the server. In certain usage scenarios, the prop can be used
+to bypass operations that only make sense in the CSR context. For example,
+suppose a section in our app uses the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API)
+to find shops near the visitor. We don't want this code to run in Node.js,
+since this capability simply isn't there. We also don't want this code to run
+in the browser during our initial dry-run, since obtaining the user's location
+requires permission. `harvest()` would otherwise end up getting stuck on a
+promise that isn't fulfilled until the user click the "Allow" button.
+
+Because we're not rendering into an empty DOM node, we need to pass a third
+argument to `render()` so that we replace the existing child node instead
+of appending to it. This is basically equivalent to calling
+`ReactDOM.hydrate()` in React.
+
+### Adjustments to HTML template
+
+The `body` element in [index.html](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/src/index.html)
+was changed from
+
+```html
+<body>
+    <div id="app-container"></div>
+</body>
+```
+to
+
+```html
+<body class="ssr">
+    <div id="app-container"><!--APP--></div>
+</body>
+```
+
+The class name allows us to style the page a little differently depending on
+whether it's SSR or CSR. It's removed in `Application.componentDidMount()`.
+The HTML comment lets our server-side code know where to place the generated
+contents.
+
+### Server-side code
+
+Our server-side code consists of a single script: [index.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/server/index.js).
+It uses [Express](https://expressjs.com/) to handle page requests. The
+following function is responsible for generating SSR pages:
+
+```javascript
+function handlePageRequest(req, res) {
+    var path = req.url;
+    var noScript = (req.query.js === '0')
+    var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
+    var options = { host, path, target };
+    ClientApp.render(options).then((rootNode) => {
+        var appHTML = PreactSSR.render(rootNode);
+        var indexHTMLPath = `${__dirname}/client/index.html`;
+        if (target === 'hydrate') {
+            // add <noscript> tag to redirect to SEO version
+            var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
+            appHTML += `<noscript>${meta}</noscript>`;
+        }
+        return replaceHTMLComment(indexHTMLPath, 'APP', appHTML).then((html) => {
+            res.type('html').send(html);
+        });
+    }).catch((err) => {
+        handleRequestError(res, err);
+    });
+}
+```
+
+For compatibility purpose we're not using the ES7 `await` operator. The code
+above is equivalent to the following:
+
+```javascript
+function handlePageRequest(req, res) {    
+    try {
+        let path = req.url;
+        let noScript = (req.query.js === '0')
+        let target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
+        let options = { host, path, target };
+        let rootNode = await ClientApp.render(options);
+        let appHTML = PreactSSR.render(rootNode);
+        let indexHTMLPath = `${__dirname}/client/index.html`;
+        if (target === 'hydrate') {
+            // add <noscript> tag to redirect to SEO version
+            var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
+            appHTML += `<noscript>${meta}</noscript>`;
+        }
+        let html = await replaceHTMLComment(indexHTMLPath, 'APP', appHTML);
+        res.type('html').send(html);
+    } catch (err) {
+        handleRequestError(res, err);
+    }
+}
+```
+
+An Express middleware is used to detect if the request is from a search engine
+spider. When it is so--or when a query variable indicates the lack of
+JavaScript support--we set the SSR target to `seo`.
+
+`ClientApp` is the SSR build of our app. After we've harvested the HTML tree,
+we pass it to [preact-render-to-string](https://github.com/developit/preact-render-to-string).
+We then stick the resulting HTML into `index.html` and send it to the browser.
+
+The remaining code deals mainly with data retrieval. While in the previous
+examples we fetch data from [SWAPI.co](https://SWAPI.co), here we handle
+data requests ourselves so that the demonstration is more realistic.
