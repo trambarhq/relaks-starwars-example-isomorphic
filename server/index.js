@@ -1,4 +1,5 @@
 var FS = require('fs');
+var OS = require('os');
 var Express = require('express');
 var SpiderDetector = require('spider-detector')
 var PreactSSR = require('preact-render-to-string');
@@ -9,20 +10,22 @@ global.fetch = require('cross-fetch');
 var DNSCache = require('dnscache');
 DNSCache({ enable: true, ttl: 300, cachesize: 100 });
 
-var host = `http://localhost:8080`;
+var basePath = `starwars`;
+var basePathAPI = `${basePath}/api`;
 var perPage = 10;
-var apiBaseURL = `${host}/starwars/api`;
+var serverPort = 8080;
 
 var app = Express();
 app.set('json spaces', 2);
 app.use(SpiderDetector.middleware());
-app.use('/starwars', Express.static(`${__dirname}/www`));
-app.get('/starwars/api/:table/:id/', handleObjectRequest);
-app.get('/starwars/api/:table/', handleListRequest);
-app.get('/starwars/*', handlePageRequest);
-app.listen(8080);
+app.use(`/${basePath}`, Express.static(`${__dirname}/www`));
+app.get(`/${basePathAPI}/:table/:id`, handleObjectRequest);
+app.get(`/${basePathAPI}/:table/`, handleListRequest);
+app.get(`/${basePath}/*`, handlePageRequest);
+app.listen(serverPort);
 
 function handlePageRequest(req, res) {
+    var host = getHostLocation(req);
     var path = req.url;
     var noScript = (req.query.js === '0')
     var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
@@ -43,6 +46,18 @@ function handlePageRequest(req, res) {
     });
 }
 
+function getHostLocation(req) {
+    // handle situation when we're behind Nginx
+    var hostname = req.headers['x-forwarded-host'] || req.hostname;
+    var protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    var port = req.headers['x-forwarded-port'] || serverPort;
+    var url = `${protocol}://${hostname}`;
+    if ((protocol === 'http' && port !== 80) || (protocol === 'http' && port !== 443)) {
+        url += `:${port}`;
+    }
+    return url;
+}
+
 function replaceHTMLComment(path, comment, newElement) {
     return new Promise((resolve, reject) => {
         FS.readFile(path, 'utf-8', (err, text) => {
@@ -58,6 +73,7 @@ function replaceHTMLComment(path, comment, newElement) {
 }
 
 function handleObjectRequest(req, res) {
+    var host = getHostLocation(req);
     var id = parseInt(req.params.id);
     var table = req.params.table;
     return loadTable(table).then((objects) => {
@@ -67,7 +83,7 @@ function handleObjectRequest(req, res) {
         if (!object) {
             throw Error('Not found');
         }
-        var result = attachHyperlinkKeys(table, object);
+        var result = attachHyperlinkKeys(host, table, object);
         res.json(result);
     }).catch((err) => {
         handleRequestError(res, err);
@@ -75,6 +91,7 @@ function handleObjectRequest(req, res) {
 }
 
 function handleListRequest(req, res) {
+    var host = getHostLocation(req);
     var page = parseInt(req.query.page) || 1;
     var table = req.params.table;
     return loadTable(table).then((objects) => {
@@ -82,9 +99,9 @@ function handleListRequest(req, res) {
         var end = start + perPage;
         var slice = objects.slice(start, end)
         var count = objects.length;
-        var next = (end < count) ? getPageURL(table, page + 1) : null;
-        var prev = (page > 1) ? getPageURL(table, page - 1) : null;
-        var results = slice.map(attachHyperlinkKeys.bind(null, table));
+        var next = (end < count) ? getPageURL(host, table, page + 1) : null;
+        var prev = (page > 1) ? getPageURL(host, table, page - 1) : null;
+        var results = slice.map(attachHyperlinkKeys.bind(null, host, table));
         res.json({ count, next, prev, results });
     }).catch((err) => {
         handleRequestError(res, err);
@@ -112,12 +129,12 @@ function loadTable(table) {
     });
 }
 
-function getObjectURL(table, id) {
-    return `${apiBaseURL}/${table}/${id}/`
+function getObjectURL(host, table, id) {
+    return `${host}/${basePathAPI}/${table}/${id}/`
 }
 
-function getPageURL(table, page) {
-    var url = `${apiBaseURL}/${table}/`;
+function getPageURL(host, table, page) {
+    var url = `${host}/${basePathAPI}/${table}/`;
     if (page > 1) {
         url += `?page=${page}`;
     }
@@ -137,8 +154,8 @@ var relations = {
     vehicles: 'vehicles',
 };
 
-function attachHyperlinkKeys(table, object) {
-    var url = getObjectURL(table, object.id);
+function attachHyperlinkKeys(host, table, object) {
+    var url = getObjectURL(host, table, object.id);
     var newObject = { url };
     for (var name in object) {
         if (name !== 'id') {
@@ -146,9 +163,9 @@ function attachHyperlinkKeys(table, object) {
             var relatedTable = relations[name];
             if (relatedTable) {
                 if (value instanceof Array) {
-                    value = value.map(getObjectURL.bind(null, relatedTable));
+                    value = value.map(getObjectURL.bind(null, host, relatedTable));
                 } else {
-                    value = getObjectURL(relatedTable, value);
+                    value = getObjectURL(host, relatedTable, value);
                 }
             }
             newObject[name] = value;
@@ -156,3 +173,7 @@ function attachHyperlinkKeys(table, object) {
     }
     return newObject;
 }
+
+process.on('unhandledRejection', (err) => {
+    console.error(err);
+});
