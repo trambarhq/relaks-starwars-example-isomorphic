@@ -18,12 +18,6 @@ class FilmPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            film: null,
-            characters: null,
-            planets: null,
-            species: null,
-            vehicles: null,
-            starships: null,
             route: route,
         };
         meanwhile.show(<FilmPageSync {...props} />);

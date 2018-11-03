@@ -18,7 +18,6 @@ class PlanetList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            planets: null,
             route: route,
         };
         meanwhile.show(<PlanetListSync {...props} />);
@@ -30,7 +29,7 @@ class PlanetList extends AsyncComponent {
 
 class PlanetListSync extends Component {
     static displayName = 'PlanetListSync';
-    
+
     /**
      * Render the component, making best effort using what props are given
      *

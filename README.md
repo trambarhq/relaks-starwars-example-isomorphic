@@ -1,5 +1,5 @@
-# Relaks Star Wars Example - Isomorphic
-
+Relaks Star Wars Example - Isomorphic
+-------------------------------------
 This is part three of the Relaks Starwars example. In [part one](https://github.com/chung-leong/relaks-starwars-example), we created a very basic page that fetch data from [SWAPI](https://swapi.co/). In [part two](https://github.com/chung-leong/relaks-starwars-example-sequel), we expanded it to something that resembles a real-world website. Now, we'll go one step further by making the app isomorphic.
 
 An isomorphic React app can render a page on either a web browser or on a server running Node.js. The purpose of server-side rendering (SSR) is first and foremost search engine optimization (SEO). Website crawlers are much better at indexing static HTML pages than single-page JavaScript apps. Providing a static version of your site improves the chance that people will find it.
@@ -9,6 +9,23 @@ SSR can also significantly reduce your site's time-to-first-impression. On this 
 This SSR page is completely static--it's just HTML. Unless the visitor has super-human reflex though, he wouldn't be able to tell. By the time he initiates the first interaction with the page, the app would likely be ready to handle it. Because the same code is used for both SSR and CSR, the transition from one to the other is seamless.
 
 With proper page caching, time-to-first-impression can easily drop below 50ms.
+
+* [Live demo](#live-demo)
+* [Getting started](#getting-started)
+* [SSR and Relaks](#ssr-and-relaks)
+* [Adjustments to WebPack configuration](#adjustments-to-webpack-configuration)
+* [Client-side code changes](#client-side-code-changes)
+* [Adjustments to HTML template](#adjustments-to-html-template)
+* [Server-side code](#server-side-code)
+* [Final word](#final-word)
+
+## Live demo
+
+TODO
+
+## Getting started
+
+TODO
 
 ## SSR and Relaks
 
@@ -54,9 +71,9 @@ The most notable difference is the specification of `node` as the target. The ou
 
 Another thing we need to do is extract CSS rules to a separate .css file instead of loading them through JavaScript. It's a common task that was omitted from the earlier examples. WebPack's [Extract Text Plugin](https://github.com/webpack-contrib/extract-text-webpack-plugin) is used for this purpose.
 
-### Client-side code changes
+## Client-side code changes
 
-The source file [main.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/src/main.js) serves as our app's entry point. In the previous examples, all it does is render the `Application` component into a DIV in the DOM. To support SSR, we need to make the code behave different when it's running on the server. When the `window` object is absent, the following code path is used:
+The source file [main.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/src/main.js) serves as our app's entry point. In the previous examples, all it does is render the `Application` component into a DIV in the DOM. To support SSR, we need to make the code behave differently when it's running on the server. When the `window` object is absent, the following code path is used:
 
 ```javascript
 async function serverSideRender(options) {
@@ -140,7 +157,7 @@ In the first `Application` element, `ssr` is set to `hydrate`, matching what was
 
 Because we're not rendering into an empty DOM node, we need to pass a third argument to `render()` so that we replace the existing child node instead of appending to it. This is basically equivalent to calling `ReactDOM.hydrate()` in React.
 
-### Adjustments to HTML template
+## Adjustments to HTML template
 
 The `body` element in [index.html](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/src/index.html) was changed from
 
@@ -159,7 +176,7 @@ to
 
 The class name allows us to style the page a little differently depending on whether it's SSR or CSR. It's removed in `Application.componentDidMount()`. The HTML comment lets our server-side code know where to place the generated contents.
 
-### Server-side code
+## Server-side code
 
 Our server-side code consists of a single script: [index.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/server/index.js). It uses [Express](https://expressjs.com/) to handle page requests. The following function is responsible for generating SSR pages:
 
@@ -216,3 +233,7 @@ An Express middleware is used to detect if the request is from a search engine s
 `ClientApp` is the SSR build of our app. After we've harvested the HTML tree, we pass it to [preact-render-to-string](https://github.com/developit/preact-render-to-string). We then stick the resulting HTML into `index.html` and send it to the browser.
 
 The remaining code deals mainly with data retrieval. While in the previous examples we fetch data from [SWAPI.co](https://SWAPI.co), here we handle data requests ourselves so that the demonstration is more realistic.
+
+## Final word
+
+TODO

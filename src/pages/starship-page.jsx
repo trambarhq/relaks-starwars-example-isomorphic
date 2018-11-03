@@ -18,9 +18,6 @@ class StarshipPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            starship: null,
-            films: null,
-            pilots: null,
             route: route,
         };
         meanwhile.show(<StarshipPageSync {...props} />);
