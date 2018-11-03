@@ -3,21 +3,18 @@ import React from 'react';
 function List(props) {
     let { route, urls, items, field, pageName } = props;
     if (urls) {
+        // accept single URL and object
         if (typeof(urls) === 'string') {
-            if (items) {
-                items = [ items ];
-            } else {
-                items = [ { url: urls, pending: true } ];
-            }
-        } else if (urls instanceof Array) {
-            items = urls.map((url, index) => {
-                var item = (items) ? items[index] : null;
-                if (!item) {
-                    item = { url, pending: true };
-                }
-                return item;
-            });
+            urls = [ urls ];
+            items = [ items ];
         }
+        items = urls.map((url, index) => {
+            var item = (items) ? items[index] : null;
+            if (!item) {
+                item = { url, pending: true };
+            }
+            return item;
+        });
     }
     if (!items) {
         return null;

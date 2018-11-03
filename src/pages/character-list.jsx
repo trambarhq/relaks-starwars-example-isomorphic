@@ -16,7 +16,6 @@ class CharacterList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            people: null,
             route: route,
         };
         meanwhile.show(<CharacterListSync {...props} />);

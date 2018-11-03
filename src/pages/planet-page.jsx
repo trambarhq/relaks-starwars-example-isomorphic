@@ -16,9 +16,6 @@ class PlanetPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            planet: null,
-            films: null,
-            residents: null,
             route: route,
         };
         meanwhile.show(<PlanetPageSync {...props} />);

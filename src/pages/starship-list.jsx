@@ -16,7 +16,6 @@ class StarshipList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            starships: null,
             route: route,
         };
         meanwhile.show(<StarshipListSync {...props} />);

@@ -16,7 +16,6 @@ class FilmList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            planets: null,
             route: route,
         };
         meanwhile.show(<FilmListSync {...props} />);

@@ -16,10 +16,6 @@ class SpeciesPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            species: null,
-            films: null,
-            people: null,
-            homeworld: null,
             route: route,
         };
         meanwhile.show(<SpeciesPageSync {...props} />);

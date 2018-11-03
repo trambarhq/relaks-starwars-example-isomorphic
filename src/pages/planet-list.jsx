@@ -16,7 +16,6 @@ class PlanetList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            planets: null,
             route: route,
         };
         meanwhile.show(<PlanetListSync {...props} />);

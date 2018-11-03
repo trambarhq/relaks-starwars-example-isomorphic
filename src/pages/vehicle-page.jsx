@@ -16,9 +16,6 @@ class VehiclePage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            vehicle: null,
-            pilots: null,
-            films: null,
             route: route,
         };
         meanwhile.show(<VehiclePageSync {...props} />);
