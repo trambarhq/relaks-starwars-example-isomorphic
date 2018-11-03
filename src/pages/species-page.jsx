@@ -16,7 +16,7 @@ class SpeciesPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<SpeciesPageSync {...props} />);
         props.species = await swapi.fetchOne(`/species/${route.params.id}/`);

@@ -16,7 +16,7 @@ class CharacterPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<CharacterPageSync {...props} />);
         props.person = await swapi.fetchOne(`/people/${route.params.id}/`);

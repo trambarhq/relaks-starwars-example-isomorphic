@@ -16,7 +16,7 @@ class StarshipList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<StarshipListSync {...props} />);
         props.starships = await swapi.fetchList('/starships/');
@@ -41,7 +41,7 @@ class StarshipListSync extends PureComponent {
         let listProps = {
             items: starships,
             pageName: 'starship-summary',
-            route: route,
+            route,
         };
         return (
             <div>

@@ -16,7 +16,7 @@ class VehicleList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<VehicleListSync {...props} />);
         props.vehicles = await swapi.fetchList('/vehicles/');
@@ -41,7 +41,7 @@ class VehicleListSync extends PureComponent {
         let listProps = {
             items: vehicles,
             pageName: 'vehicle-summary',
-            route: route,
+            route,
         };
         return (
             <div>

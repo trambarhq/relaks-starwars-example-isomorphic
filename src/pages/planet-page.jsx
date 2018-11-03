@@ -16,7 +16,7 @@ class PlanetPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<PlanetPageSync {...props} />);
         props.planet = await swapi.fetchOne(`/planets/${route.params.id}/`);

@@ -16,7 +16,7 @@ class FilmPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<FilmPageSync {...props} />);
         props.film = await swapi.fetchOne(`/films/${route.params.id}/`);

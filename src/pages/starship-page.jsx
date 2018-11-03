@@ -16,7 +16,7 @@ class StarshipPage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<StarshipPageSync {...props} />);
         props.starship = await swapi.fetchOne(`/starships/${route.params.id}/`);
