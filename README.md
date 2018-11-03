@@ -18,11 +18,12 @@ With proper page caching, time-to-first-impression can match that of a static HT
 * [Client-side code changes](#client-side-code-changes)
 * [Adjustments to HTML template](#adjustments-to-html-template)
 * [Server-side code](#server-side-code)
+* [Usage scenarios](#usage-scenarios)
 * [Final word](#final-word)
 
 ## React version
 
-TODO
+A version of this example that uses React instead of Preact is available. If you're interested in using React, please look at the code and README in the [*react* branch](https://github.com/chung-leong/relaks-starwars-example-isomorphic/tree/react).
 
 ## Live demo
 
@@ -187,6 +188,7 @@ Our server-side code consists of a single script: [index.js](https://github.com/
 
 ```javascript
 function handlePageRequest(req, res) {
+    var host = getHostLocation(req);
     var path = req.url;
     var noScript = (req.query.js === '0')
     var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
@@ -213,6 +215,7 @@ For compatibility purpose we're not using the ES7 `await` operator. The code abo
 ```javascript
 function handlePageRequest(req, res) {    
     try {
+        let host = getHostLocation(req);
         let path = req.url;
         let noScript = (req.query.js === '0')
         let target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
@@ -238,6 +241,14 @@ An Express middleware is used to detect if the request is from a search engine s
 `ClientApp` is the SSR build of our app. After we've harvested the HTML tree, we pass it to [preact-render-to-string](https://github.com/developit/preact-render-to-string). We then stick the resulting HTML into `index.html` and send it to the browser.
 
 The remaining code deals mainly with data retrieval. While in the previous examples we fetch data from [SWAPI.co](https://SWAPI.co), here we handle data requests ourselves so that the demonstration is more realistic.
+
+## Usage scenarios
+
+One thing you might notice while looking at the [example](https://trambar.io/starwars/films/) is how clicking on a link brings up the page almost instantaneously. This is because we must fetch a complete object even when we only need just one of its properties. In the **Films** page for instance, we only need the films' titles. But we end up fetching all the information concerning them. The extra information enables us to display something when the user subsequently clicks on a link. The inefficiency of a REST API actually works to our advantage here by acting as a data-prefetch mechanism.
+
+The dynamic described above can be especially useful at a content-heavy website. Imagine you're building a news portal. The front page will link to 20, 30 stories. For each story, a title and a short blurb is shown. Your REST API always return complete objects. The full texts of the story are therefore fetched as well. If text is around 20 KB in size, your page wouldn't be ready until 400-600 KB has been downloaded. A visitor would be staring at a loading animation in the meantime--if yours is a pure client-side solution. Employing server-side rendering masks this transfer time. Since the server will send only what's actually shown (the titles and the short blurbs), the (static) page will load quickly. And while the visitor is looking at the list and contemplating which story he wishes to read, the stories are silently transferred to his computer. When he finally decides to click on one, it'll be there already. The story will appear immediately. This instant gratification will help you gather more page-views.
+
+The fact that your site is now also optimized for search engines would bring in more page-views as well.
 
 ## Final word
 
