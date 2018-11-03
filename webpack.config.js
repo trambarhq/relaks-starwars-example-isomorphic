@@ -16,7 +16,7 @@ var clientConfig = {
     entry: './main',
     output: {
         path: Path.resolve('./server/www'),
-        publicPath: '/starwars/',
+        publicPath: '/starwars-react/',
         filename: 'app.js',
     },
     resolve: {
@@ -77,7 +77,7 @@ var serverConfig = {
         path: Path.resolve('./server/client'),
         filename: 'app.js',
         libraryTarget: 'commonjs2',
-        publicPath: '/starwars',
+        publicPath: '/starwars-react',
     },
     resolve: clientConfig.resolve,
     module: clientConfig.module,

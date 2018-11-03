@@ -6,8 +6,8 @@ import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest';
 
-const dataSourceBaseURL = '/starwars/api';
-const pageBasePath = '/starwars';
+const dataSourceBaseURL = '/starwars-react/api';
+const pageBasePath = '/starwars-react';
 
 if (typeof(window) === 'object') {
     async function initialize(evt) {
