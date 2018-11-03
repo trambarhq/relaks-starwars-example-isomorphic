@@ -18,7 +18,7 @@ class FilmList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<FilmListSync {...props} />);
         props.planets = await swapi.fetchList('/films/');
@@ -44,7 +44,7 @@ class FilmListSync extends Component {
             items: planets,
             field: 'title',
             pageName: 'film-summary',
-            route: route,
+            route,
         };
         return (
             <div>

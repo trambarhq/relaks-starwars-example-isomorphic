@@ -18,7 +18,7 @@ class CharacterList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<CharacterListSync {...props} />);
         props.people = await swapi.fetchList('/people/');
@@ -44,7 +44,7 @@ class CharacterListSync extends Component {
             items: people,
             field: 'name',
             pageName: 'character-summary',
-            route: route,
+            route,
         };
         return (
             <div>

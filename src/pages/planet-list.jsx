@@ -18,7 +18,7 @@ class PlanetList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<PlanetListSync {...props} />);
         props.planets = await swapi.fetchList('/planets/');
@@ -43,7 +43,7 @@ class PlanetListSync extends Component {
         let listProps = {
             items: planets,
             pageName: 'planet-summary',
-            route: route,
+            route,
         };
         return (
             <div>

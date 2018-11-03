@@ -18,7 +18,7 @@ class SpeciesList extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<SpeciesListSync {...props} />);
         props.species = await swapi.fetchList('/species/');
@@ -43,7 +43,7 @@ class SpeciesListSync extends Component {
         let listProps = {
             items: species,
             pageName: 'species-summary',
-            route: route,
+            route,
         };
         return (
             <div>

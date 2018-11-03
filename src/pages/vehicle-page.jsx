@@ -18,7 +18,7 @@ class VehiclePage extends AsyncComponent {
     async renderAsync(meanwhile) {
         let { route, swapi } = this.props;
         let props = {
-            route: route,
+            route,
         };
         meanwhile.show(<VehiclePageSync {...props} />);
         props.vehicle = await swapi.fetchOne(`/vehicles/${route.params.id}/`);
