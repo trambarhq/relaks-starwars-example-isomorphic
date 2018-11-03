@@ -8,8 +8,9 @@ SSR can also significantly reduce your site's time-to-first-impression. On this 
 
 This SSR page is completely static--it's just HTML. Unless the visitor has super-human reflex though, he wouldn't be able to tell. By the time he initiates the first interaction with the page, the app would likely be ready to handle it. Because the same code is used for both SSR and CSR, the transition from one to the other is seamless.
 
-With proper page caching, time-to-first-impression can easily drop below 50ms.
+With proper page caching, time-to-first-impression can match that of a static HTML page.
 
+* [React version](#react-version)
 * [Live demo](#live-demo)
 * [Getting started](#getting-started)
 * [SSR and Relaks](#ssr-and-relaks)
@@ -19,13 +20,17 @@ With proper page caching, time-to-first-impression can easily drop below 50ms.
 * [Server-side code](#server-side-code)
 * [Final word](#final-word)
 
-## Live demo
+## React version
 
 TODO
+
+## Live demo
+
+You can see the app in action [here](https://trambar.io/starwars/characters/). When the page is rendered on the server side, it has a reddish background color. The color is removed once the client takes over. This can happen in less than a second as the app is very small. You might want to activate bandwidth throttling to slow things down a bit. Hit the browser's refresh button to to see the SSR version again. If you wish to see the SEO version, disable JavaScript for the site. On Chrome, you can do this by clicking the lock icon next to the page URL and select "Site settings".
 
 ## Getting started
 
-TODO
+To see the code running in debug mode, first clone this repository. In the working folder, run `npm install`. Once that's done, run `npm run watch` to rebuild the app with debugging enabled. In a different terminal, run `node server/index.js`. Open a browser window and enter `http://localhost:8080/starwars/` as the location. To see the server-side code in debug mode, run `node --inspect server/index.js`. Open a Chrome window and navigate to `chrome://inspect/`. The server script to be listed under **Remote Target**. Click on it to enter the debugger.
 
 ## SSR and Relaks
 
