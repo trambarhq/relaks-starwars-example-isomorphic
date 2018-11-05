@@ -24,18 +24,12 @@ class Application extends PureComponent {
      */
     render() {
         let { route, swapi } = this.state;
-        let module = route.params.module;
-        let page;
-        if (module) {
-            let Component = module.default;
-            let props = { route, swapi };
-            page = <Component {...props} />;
-        }
+        let PageComponent = route.params.module.default;
         return (
             <div>
                 <NavBar route={route} />
                 <div className="contents">
-                    {page}
+                    <PageComponent route={route} swapi={swapi} />
                 </div>
             </div>
         );
