@@ -27,7 +27,11 @@ A version of this example that uses React instead of Preact is available. If you
 
 ## Live demo
 
-You can see the app in action [here](https://trambar.io/starwars/characters/). When the page is rendered on the server side, it has a reddish background color. The color is removed once the client takes over. This can happen in less than a second as the app is very small. You might want to activate bandwidth throttling to slow things down a bit. Hit the browser's refresh button to to see the SSR version again. If you wish to see the SEO version, disable JavaScript for the site. On Chrome, you can do this by clicking the lock icon next to the page URL and select "Site settings".
+You can see the app in action [here](https://trambar.io/starwars/characters/). When the page is rendered on the server side, it has a reddish background color. The color is removed once the client takes over. This can happen in less than a second as the app is fairly small. You might want to activate bandwidth throttling to slow things down a bit. Hit the browser's refresh button to to see the SSR version again. 
+
+![Screenshot](docs/img/screenshot.png)
+
+If you wish to see the SEO version, disable JavaScript for the site. On Chrome, you can do this by clicking the lock icon next to the page URL and select "Site settings".
 
 ## Getting started
 
