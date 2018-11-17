@@ -19,7 +19,7 @@ With proper page caching, time-to-first-impression can match that of a static HT
 * [Adjustments to HTML template](#adjustments-to-html-template)
 * [Server-side code](#server-side-code)
 * [Usage scenarios](#usage-scenarios)
-* [Final word](#final-word)
+* [Final words](#final-words)
 
 ## React version
 
@@ -27,7 +27,7 @@ A version of this example that uses React instead of Preact is available. If you
 
 ## Live demo
 
-You can see the app in action [here](https://trambar.io/starwars/characters/). When the page is rendered on the server side, it has a reddish background color. The color is removed once the client takes over. This can happen in less than a second as the app is fairly small. You might want to activate bandwidth throttling to slow things down a bit. Hit the browser's refresh button to to see the SSR version again. 
+You can see the app in action [here](https://trambar.io/starwars/characters/). When the page is rendered on the server side, it has a reddish background color. The color is removed once the client takes over. This can happen in less than a second as the app is fairly small. You might want to activate bandwidth throttling to slow things down a bit. Hit the browser's refresh button to to see the SSR version again.
 
 ![Screenshot](docs/img/screenshot.png)
 
@@ -250,10 +250,10 @@ The remaining code deals mainly with data retrieval. While in the previous examp
 
 One thing you might notice while looking at the [example](https://trambar.io/starwars/films/) is how clicking on a link brings up the page almost instantaneously. This is because we must fetch a complete object even when we only need just one of its properties. In the **Films** page for instance, we only need the films' titles. But we end up fetching all the information concerning them. The extra information enables us to display something when the user subsequently clicks on a link. The inefficiency of a REST API actually works to our advantage here by acting as a data-prefetch mechanism.
 
-The dynamic described above can be especially useful at a content-heavy website. Imagine you're building a news portal. The front page will link to 20, 30 stories. For each story, a title and a short blurb is shown. Your REST API always return complete objects. The full texts of the story are therefore fetched as well. If text is around 20 KB in size, your page wouldn't be ready until 400-600 KB has been downloaded. A visitor would be staring at a loading animation in the meantime--if yours is a pure client-side solution. Employing server-side rendering masks this transfer time. Since the server will send only what's actually shown (the titles and the short blurbs), the (static) page will load quickly. And while the visitor is looking at the list and contemplating which story he wishes to read, the stories are silently transferred to his computer. When he finally decides to click on one, it'll be there already. The story will appear immediately. This instant gratification will help you gather more page-views.
+The dynamic described above can be especially useful at a content-heavy website. Imagine you're building a news portal. The front page will link to 20, 30 stories. For each story, a title and a short blurb is shown. Your REST API always return complete objects. The full texts of the story are therefore fetched as well. If text is around 20 KB in size, your page wouldn't be ready until 400-600 KB has been downloaded. A visitor would be staring at a loading animation in the meantime if yours is a pure client-side solution. Employing server-side rendering masks this transfer time. Since the server will send only what's actually shown (the titles and the short blurbs), the (static) page will load quickly. And while the visitor is looking at the list and contemplating which story he wishes to read, the stories are silently transferred to his computer. When he finally decides to click on one, it'll be there already. The story will appear immediately. If he doesn't like it, he can quickly go back to the list and choose another. The lack of a loading time penalty means visitors will be more willing to give a story a chance. That in turns helps increase page view at your site.
 
-The fact that your site is now also optimized for search engines would bring in more page-views as well.
+## Final words
 
-## Final word
+We've reached the end of our trilogy of examples. Starting out with a very crude page we managed to build something with a certain measure of sophistication. I hope most of it was comprehensible. That's the fundamental goal of Relaks, helping you build data-driven web apps in a straight forward manner.
 
-TODO
+The Star Wars API examples only deal with data retrieval. If you wish to see an example involving data modification and user authentication, please consult the [Django todo list example](https://github.com/chung-leong/relaks-django-todo-example).
