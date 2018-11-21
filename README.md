@@ -39,7 +39,7 @@ To see the code running in debug mode, first clone this repository. In the worki
 
 ## SSR and Relaks
 
-Conceptually, enabling SSR on an app using Relaks is very simple: We just need to wait for all promises returned by `renderAsync()` to be fulfilled. The [relaks-harvest](https://github.com/chung-leong/relaks-harvest) library is designed exactly for this task. Given a Preact *VNode*, `harvest()` will recursively call either `renderAsync()` or `render()`.  Once everything is rendered, it asynchronously returns a tree containing only HTML and text nodes. This tree can then be passed to [preact-render-to-string](https://github.com/developit/preact-render-to-string).
+Conceptually, enabling SSR on an app using Relaks is very simple: We just need to wait for all promises returned by `renderAsync()` to be fulfilled. The [relaks-harvest](https://github.com/chung-leong/relaks-harvest) library is designed exactly for this task. Given a Preact `VNode`, `harvest()` will recursively call either `renderAsync()` or `render()`.  Once everything is rendered, it asynchronously returns a tree containing only HTML and text nodes. This tree can then be passed to [preact-render-to-string](https://github.com/developit/preact-render-to-string).
 
 ## Adjustments to WebPack configuration
 
@@ -161,7 +161,7 @@ async function initialize(evt) {
 window.addEventListener('load', initialize);
 ```
 
-The code is almost the same as before. The critical addition here is the call to `harvest()`. Even though we have no need to generate HTML, we still perform the operation so that the data required by the initial rendering to be pulled into the cache of `DjangoDataSource`. When we render the application "for real", queries for data will succeed immediately.
+The code is almost the same as before. The critical addition here is the call to `harvest()`. Even though we have no need to generate HTML, we still perform the operation so that data required by the initial render is pulled into the cache of `DjangoDataSource`. When we render the application "for real", queries for data will succeed immediately.
 
 In the first `Application` element, `ssr` is set to `hydrate`, matching what was done on the server. In certain usage scenarios, the prop can be used to bypass operations that only make sense in the CSR context. For example, suppose a section in our app uses the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) to find shops near the visitor. We don't want this code to run in Node.js, since this capability simply isn't there. We also don't want this code to run in the browser during our initial dry-run, since obtaining the user's location requires permission. `harvest()` would otherwise end up getting stuck on a promise that isn't fulfilled until the user click the "Allow" button.
 

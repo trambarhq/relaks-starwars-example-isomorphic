@@ -1,7 +1,7 @@
 {
   "name": "relaks-starwars-example-isomorphic",
   "version": "1.0.0",
-  "description": "An example of using Prelaks that retrieves data from swapi.co",
+  "description": "An example of using Relaks to build an isomorphic app",
   "scripts": {
     "watch": "webpack --watch",
     "build": "webpack",
