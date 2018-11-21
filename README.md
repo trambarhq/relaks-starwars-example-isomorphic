@@ -1,12 +1,12 @@
 Relaks Star Wars Example - Isomorphic
 -------------------------------------
-This is part three of the Relaks Starwars example. In [part one](https://github.com/chung-leong/relaks-starwars-example), we created a very basic page that fetch data from [SWAPI](https://swapi.co/). In [part two](https://github.com/chung-leong/relaks-starwars-example-sequel), we expanded it to something that resembles a real-world website. Now, we'll go one step further by making the app isomorphic.
+This is part three of the Relaks Starwars saga. In [part one](https://github.com/chung-leong/relaks-starwars-example), we created a very basic page that fetch data from [SWAPI](https://swapi.co/). In [part two](https://github.com/chung-leong/relaks-starwars-example-sequel), we expanded it to something that resembles a real-world website. Now, we'll go one step further by making the app isomorphic.
 
 An isomorphic React app can render a page on either a web browser or on a server running Node.js. The purpose of server-side rendering (SSR) is first and foremost search engine optimization (SEO). Website crawlers are much better at indexing static HTML pages than single-page JavaScript apps. Providing a static version of your site improves the chance that people will find it.
 
-SSR can also significantly reduce your site's time-to-first-impression. On this matrix, single-page JavaScript apps are often quite poor. The size of a modern JavaScript app can easily exceed 1MB, depending on what libraries are used. And after the app itself loads, it needs to retrieve the data that it needs to generate a page. That could take seconds, during which the impatient among your visitors might hit the back button. SSR allows you to show them the initial appearance of your app instead of a boring loading screen.
+SSR can also significantly reduce your site's time-to-first-impression. On this matrix, single-page JavaScript apps are often quite poor. The size of a modern JavaScript app can easily exceed 1MB, depending on what libraries are used. And after the app loads, it needs to retrieve the data that it needs to generate a page. That could take seconds, during which the impatient among your visitors might hit the back button. SSR allows you to show them the initial appearance of your app instead of a boring loading screen.
 
-This SSR page is completely static--it's just HTML. Unless the visitor has super-human reflex though, he wouldn't be able to tell. By the time he initiates the first interaction with the page, the app would likely be ready to handle it. Because the same code is used for both SSR and CSR, the transition from one to the other is seamless.
+This SSR page is completely static--it's just HTML. Unless the visitor has super-human reflex though, he wouldn't be able to tell. By the time he initiates his first interaction with the page, the app would likely be ready to handle it. Because the same code is used for both SSR and CSR, the transition from one to the other is seamless.
 
 With proper page caching, time-to-first-impression can match that of a static HTML page.
 
@@ -39,11 +39,11 @@ To see the code running in debug mode, first clone this repository. In the worki
 
 ## SSR and Relaks
 
-Conceptually, enabling SSR on an app using Relaks is very simple: We just need to wait for all promises returned by `renderAsync()` to be fulfilled. The [relaks-harvest](https://github.com/chung-leong/relaks-harvest) library is designed exactly for this task. Given a *ReactElement* (or Preact *VNode*), `harvest()` will recursively call either `renderAsync()` or `render()`.  Once everything is rendered, it asynchronously returns a tree containing only HTML and text nodes. This tree can then be passed to [`ReactDOMServer.renderToString()`](https://reactjs.org/docs/react-dom-server.html#rendertostring) (or [preact-render-to-string](https://github.com/developit/preact-render-to-string)).
+Conceptually, enabling SSR on an app using Relaks is very simple: We just need to wait for all promises returned by `renderAsync()` to be fulfilled. The [relaks-harvest](https://github.com/chung-leong/relaks-harvest) library is designed exactly for this task. Given a Preact *VNode*, `harvest()` will recursively call either `renderAsync()` or `render()`.  Once everything is rendered, it asynchronously returns a tree containing only HTML and text nodes. This tree can then be passed to [preact-render-to-string](https://github.com/developit/preact-render-to-string).
 
 ## Adjustments to WebPack configuration
 
-The first thing we need to do to enable SSR is to add a new build target in our WebPack configuration. By default, WebPack generates code suitable for browsers. We need ask WebPack to prepare a separate build for an Node.js environment. In [webpack.config.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/webpack.config.js#L96), we change the export statement to the following:
+The first thing we need to do to enable SSR is to add a new build target in our WebPack configuration. By default, WebPack generates code suitable for browsers. We need ask WebPack to prepare a separate build for a Node.js environment. In [webpack.config.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/master/webpack.config.js#L96), we change the export statement to the following:
 
 ```javascript
 module.exports = [ serverConfig, clientConfig ];
@@ -110,7 +110,7 @@ The function above is called from Node.js. It first initiates the data source an
 
 On the client-side, we call `RouteManager.start()` without any argument, as the current URL can be obtained from the `location` object. On the server-side, we need to call it with the desired path.
 
-The `ssr` prop given to `Application` has two possible values: `seo` and `hydrate`. It let the app make adjustments based on whether it's generating HTML for SEO. The `fetchList()` and `fetchMultiple()` methods are modified as follows:
+The `ssr` prop given to `Application` has two possible values: `seo` and `hydrate`. It lets the app make adjustments based on whether it's generating HTML for SEO. The `fetchList()` and `fetchMultiple()` methods are modified as follows:
 
 ```javascript
 fetchList(url, options) {
@@ -161,7 +161,7 @@ async function initialize(evt) {
 window.addEventListener('load', initialize);
 ```
 
-The code is almost the same before. The critical addition here is the call to `harvest()`. Even though we have no need to generate HTML, performing the operation causes the data required by the initial rendering to be pulled into the cache of `DjangoDataSource`. When we render the application "for real", queries for data will succeed immediately.
+The code is almost the same as before. The critical addition here is the call to `harvest()`. Even though we have no need to generate HTML, we still perform the operation so that the data required by the initial rendering to be pulled into the cache of `DjangoDataSource`. When we render the application "for real", queries for data will succeed immediately.
 
 In the first `Application` element, `ssr` is set to `hydrate`, matching what was done on the server. In certain usage scenarios, the prop can be used to bypass operations that only make sense in the CSR context. For example, suppose a section in our app uses the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) to find shops near the visitor. We don't want this code to run in Node.js, since this capability simply isn't there. We also don't want this code to run in the browser during our initial dry-run, since obtaining the user's location requires permission. `harvest()` would otherwise end up getting stuck on a promise that isn't fulfilled until the user click the "Allow" button.
 
@@ -248,12 +248,12 @@ The remaining code deals mainly with data retrieval. While in the previous examp
 
 ## Usage scenarios
 
-One thing you might notice while looking at the [example](https://trambar.io/starwars/films/) is how clicking on a link brings up the page almost instantaneously. This is because we must fetch a complete object even when we only need just one of its properties. In the **Films** page for instance, we only need the films' titles. But we end up fetching all the information concerning them. The extra information enables us to display something when the user subsequently clicks on a link. The inefficiency of a REST API actually works to our advantage here by acting as a data-prefetch mechanism.
+One thing you might notice while looking at the [example](https://trambar.io/starwars/films/) is how clicking on a link brings up the page almost instantaneously. This is because we must fetch a complete object even when we only need just one of its properties. In the **Films** page for instance, we only need the films' titles. But we end up fetching all the information concerning them. The extra information enables us to display something immediately when the user subsequently clicks on a link. The inefficiency of a REST API actually works to our advantage by acting as a data-prefetch mechanism.
 
-The dynamic described above can be especially useful at a content-heavy website. Imagine you're building a news portal. The front page will link to 20, 30 stories. For each story, a title and a short blurb is shown. Your REST API always return complete objects. The full texts of the story are therefore fetched as well. If text is around 20 KB in size, your page wouldn't be ready until 400-600 KB has been downloaded. A visitor would be staring at a loading animation in the meantime if yours is a pure client-side solution. Employing server-side rendering masks this transfer time. Since the server will send only what's actually shown (the titles and the short blurbs), the (static) page will load quickly. And while the visitor is looking at the list and contemplating which story he wishes to read, the stories are silently transferred to his computer. When he finally decides to click on one, it'll be there already. The story will appear immediately. If he doesn't like it, he can quickly go back to the list and choose another. The lack of a loading time penalty means visitors will be more willing to give a story a chance. That in turns helps increase page view at your site.
+The dynamic described above can be especially useful at a content-heavy website. Imagine you're building a news portal. The front page will link to 20, 30 stories. For each story, a title and a short blurb is shown. Your REST API always return complete objects. The full texts of the story are therefore fetched as well. If text is around 20 KB in size, your page wouldn't be ready until 400-600 KB have been downloaded. Visitors would be staring at a loading animation in the meantime if yours is a pure client-side solution. Employing server-side rendering masks this transfer time. Since the server will send only what's actually shown (titles and short blurbs), the (static) page will load quickly. And while the visitors are looking at the list and contemplating which story they wishes to read, the stories are silently transferred to their computers. When they finally decides to click on one, it'll be there already. The story will appear immediately. If he doesn't like it, he can quickly go back to the list and choose another. The lack of a loading time penalty means visitors will be more willing to give a story a chance. That in turns helps increase page views at your site.
 
 ## Final words
 
-We've reached the end of our trilogy of examples. Starting out with a very crude page we managed to build something with a certain measure of sophistication. I hope most of it was comprehensible. That's the fundamental goal of Relaks, helping you build data-driven web apps in a straight forward manner.
+We've reached the end of our trilogy of examples. Starting out with a very crude page we managed to build something with a certain measure of sophistication. I hope you managed to follow the examples without difficulty. That's the goal of Relaks: making it easy to program with React. If there's anything unclear, please [let me know](https://github.com/chung-leong/relaks-starwars-example-isomorphic/issues).
 
 The Star Wars API examples only deal with data retrieval. If you wish to see an example involving data modification and user authentication, please consult the [Django todo list example](https://github.com/chung-leong/relaks-django-todo-example).
