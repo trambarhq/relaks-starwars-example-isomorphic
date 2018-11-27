@@ -33,7 +33,7 @@
     "preact": "~8.2.9",
     "regenerator-runtime": "^0.12.0",
     "relaks": "^1.1.5",
-    "relaks-django-data-source": "^0.0.11",
+    "relaks-django-data-source": "^0.0.12",
     "relaks-harvest": "^0.0.1",
     "relaks-route-manager": "0.0.14",
     "sass-loader": "^6.0.5",

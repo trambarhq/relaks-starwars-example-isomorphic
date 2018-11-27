@@ -42,6 +42,7 @@ if (typeof(window) === 'object') {
     async function serverSideRender(options) {
         let dataSource = new DjangoDataSource({
             baseURL: `${options.host}${dataSourceBaseURL}`,
+            fetchFunc: options.fetch,
         });
         dataSource.activate();
 
