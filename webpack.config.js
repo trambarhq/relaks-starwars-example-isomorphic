@@ -44,12 +44,6 @@ var clientConfig = {
                 }
             },
             {
-                test: /\.css$/,
-                use: ExtractTextPlugin.extract({
-                    use: 'css-loader',
-                })
-            },
-            {
                 test: /\.scss$/,
                 use: ExtractTextPlugin.extract({
                     use: 'css-loader!sass-loader',
