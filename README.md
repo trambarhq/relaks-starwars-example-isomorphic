@@ -84,6 +84,7 @@ The source file [main.js](https://github.com/chung-leong/relaks-starwars-example
 async function serverSideRender(options) {
     let dataSource = new DjangoDataSource({
         baseURL: `${options.host}${dataSourceBaseURL}`,
+        fetchFunc: options.fetch,
     });
     dataSource.activate();
 
@@ -191,7 +192,7 @@ function handlePageRequest(req, res) {
     var path = req.url;
     var noScript = (req.query.js === '0')
     var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
-    var options = { host, path, target };
+    var options = { host, path, target, fetch: CrossFetch };
     ClientApp.render(options).then((rootNode) => {
         var appHTML = ReactDOMServer.renderToString(rootNode);
         var indexHTMLPath = `${__dirname}/client/index.html`;
@@ -218,7 +219,7 @@ function handlePageRequest(req, res) {
         let path = req.url;
         let noScript = (req.query.js === '0')
         let target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
-        let options = { host, path, target };
+        let options = { host, path, target, fetch: CrossFetch };
         let rootNode = await ClientApp.render(options);
         let appHTML = ReactDOMServer.renderToString(rootNode);
         let indexHTMLPath = `${__dirname}/client/index.html`;
