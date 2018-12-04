@@ -8,6 +8,7 @@ function List(props) {
             urls = [ urls ];
             items = [ items ];
         }
+        // deal with holes in the data set
         items = urls.map((url, index) => {
             var item = (items) ? items[index] : null;
             if (!item) {
