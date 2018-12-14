@@ -213,7 +213,7 @@ function handlePageRequest(req, res) {
 For compatibility purpose we're not using the ES7 `await` operator. The code above is equivalent to the following:
 
 ```javascript
-function handlePageRequest(req, res) {    
+async function handlePageRequest(req, res) {    
     try {
         let host = getHostLocation(req);
         let path = req.url;
