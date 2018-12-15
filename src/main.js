@@ -5,6 +5,7 @@ import { routes } from 'routing';
 import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest/preact';
+import Relaks from 'relaks/preact';
 
 const dataSourceBaseURL = '/starwars/api';
 const pageBasePath = '/starwars';
@@ -32,7 +33,10 @@ if (typeof(window) === 'object') {
             throw new Error('Unable to find app element in DOM');
         }
         let ssrElement = h(Application, { dataSource, routeManager, ssr: 'hydrate' });
-        await harvest(ssrElement);
+        let seeds = await harvest(ssrElement);
+        Relaks.set('seeds', seeds);
+        render(ssrElement, appContainer, appContainer.firstChild);
+
         let appElement = h(Application, { dataSource, routeManager });
         render(appElement, appContainer, appContainer.firstChild);
     }

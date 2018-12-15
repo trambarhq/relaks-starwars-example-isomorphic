@@ -50,6 +50,17 @@ class Application extends Component {
     }
 
     /**
+     * Recreate swapi when ssr changes
+     */
+    componentDidUpdate(prevProps, prevState) {
+        let { dataSource, ssr } = this.props;
+        if (prevProps.ssr !== ssr) {
+            let swapi = new SWAPI(dataSource, ssr);
+            this.setState({ swapi });
+        }
+    }
+
+    /**
      * Remove change handlers when component mounts
      */
     componentWillUnmount() {

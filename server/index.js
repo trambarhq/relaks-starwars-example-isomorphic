@@ -33,12 +33,12 @@ function handlePageRequest(req, res) {
     ClientApp.render(options).then((rootNode) => {
         var appHTML = PreactSSR.render(rootNode);
         var indexHTMLPath = `${__dirname}/client/index.html`;
-        if (target === 'hydrate') {
-            // add <noscript> tag to redirect to SEO version
-            var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
-            appHTML += `<noscript>${meta}</noscript>`;
-        }
         return replaceHTMLComment(indexHTMLPath, 'APP', appHTML).then((html) => {
+            if (target === 'hydrate') {
+                // add <noscript> tag to redirect to SEO version
+                var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
+                html += `<noscript>${meta}</noscript>`;
+            }
             res.type('html').send(html);
         });
     }).catch((err) => {
