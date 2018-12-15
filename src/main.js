@@ -1,10 +1,11 @@
 import { createElement } from 'react';
-import { hydrate } from 'react-dom';
+import { hydrate, render } from 'react-dom';
 import { Application } from 'application';
 import { routes } from 'routing';
 import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest';
+import Relaks from 'relaks';
 
 const dataSourceBaseURL = '/starwars-react/api';
 const pageBasePath = '/starwars-react';
@@ -32,9 +33,12 @@ if (typeof(window) === 'object') {
             throw new Error('Unable to find app element in DOM');
         }
         let ssrElement = createElement(Application, { dataSource, routeManager, ssr: 'hydrate' });
-        await harvest(ssrElement);
+        let seeds = await harvest(ssrElement, { seeds: true });
+        Relaks.set('seeds', seeds);
+        hydrate(ssrElement, appContainer);
+
         let appElement = createElement(Application, { dataSource, routeManager });
-        hydrate(appElement, appContainer);
+        render(appElement, appContainer);
     }
 
     window.addEventListener('load', initialize);

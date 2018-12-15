@@ -149,19 +149,24 @@ async function initialize(evt) {
         throw new Error('Unable to find app element in DOM');
     }
     let ssrElement = createElement(Application, { dataSource, routeManager, ssr: 'hydrate' });
-    await harvest(ssrElement);
+    let seeds = await harvest(ssrElement, { seeds: true });
+    Relaks.set('seeds', seeds);
+    hydrate(ssrElement, appContainer);
+
     let appElement = createElement(Application, { dataSource, routeManager });
-    hydrate(appElement, appContainer);
+    render(appElement, appContainer);
 }
 
 window.addEventListener('load', initialize);
 ```
 
-The code is almost the same as before. The critical addition here is the call to `harvest()`. Even though we have no need to generate HTML, we still perform the operation so that data required by the initial render is pulled into the cache of `DjangoDataSource`. When we render the application "for real", queries for data will succeed immediately.
+The code is almost the same as before. The critical addition here is the call to `harvest()`. It's used to generate the same contents that the server had done. We pass the option `{ seeds: true }` so that function would return the rendering results of asynchronous components. These "seeds" are given to Relaks, which will use them during the initial rendering cycle in lieu of calling `renderAsync()`.
 
 In the first `Application` element, `ssr` is set to `hydrate`, matching what was done on the server. In certain usage scenarios, the prop can be used to bypass operations that only make sense in the CSR context. For example, suppose a section in our app uses the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) to find shops near the visitor. We don't want this code to run in Node.js, since the capability simply isn't there. We also don't want this code to run in the browser during our initial dry-run, since obtaining the user's location requires permission. `harvest()` would otherwise end up getting stuck on a promise that isn't fulfilled until the user click the "Allow" button.
 
-`ReactDOM.hydrate()` is used to render the application element into an already populated DOM node instead of `ReactDOM.render()`. See the [React documentation](https://reactjs.org/docs/react-dom.html#hydrate) for more details.
+`ReactDOM.hydrate()` is used to render the application element into an already populated DOM node. See the [React documentation](https://reactjs.org/docs/react-dom.html#hydrate) for more details.
+
+The second `Application` element is used to turn off the `ssr` flag.
 
 ## Adjustments to HTML template
 
@@ -196,12 +201,12 @@ function handlePageRequest(req, res) {
     ClientApp.render(options).then((rootNode) => {
         var appHTML = ReactDOMServer.renderToString(rootNode);
         var indexHTMLPath = `${__dirname}/client/index.html`;
-        if (target === 'hydrate') {
-            // add <noscript> tag to redirect to SEO version
-            var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
-            appHTML += `<noscript>${meta}</noscript>`;
-        }
         return replaceHTMLComment(indexHTMLPath, 'APP', appHTML).then((html) => {
+            if (target === 'hydrate') {
+                // add <noscript> tag to redirect to SEO version
+                var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
+                html += `<noscript>${meta}</noscript>`;
+            }
             res.type('html').send(html);
         });
     }).catch((err) => {
@@ -223,12 +228,12 @@ async function handlePageRequest(req, res) {
         let rootNode = await ClientApp.render(options);
         let appHTML = ReactDOMServer.renderToString(rootNode);
         let indexHTMLPath = `${__dirname}/client/index.html`;
+        let html = await replaceHTMLComment(indexHTMLPath, 'APP', appHTML);
         if (target === 'hydrate') {
             // add <noscript> tag to redirect to SEO version
             var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
-            appHTML += `<noscript>${meta}</noscript>`;
+            html += `<noscript>${meta}</noscript>`;
         }
-        let html = await replaceHTMLComment(indexHTMLPath, 'APP', appHTML);
         res.type('html').send(html);
     } catch (err) {
         handleRequestError(res, err);
