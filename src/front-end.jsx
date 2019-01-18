@@ -7,8 +7,8 @@ import 'style.scss';
 
 /** @jsx h */
 
-class Application extends Component {
-    static displayName = 'Application';
+class FrontEnd extends Component {
+    static displayName = 'FrontEnd';
 
     constructor(props) {
         super(props);
@@ -89,6 +89,6 @@ class Application extends Component {
 }
 
 export {
-    Application as default,
-    Application
+    FrontEnd as default,
+    FrontEnd
 };
