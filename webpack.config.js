@@ -17,7 +17,8 @@ var clientConfig = {
     output: {
         path: Path.resolve('./server/www'),
         publicPath: '/starwars-react/',
-        filename: 'app.js',
+        filename: 'front-end.js',
+        chunkFilename: '[name].js',
     },
     resolve: {
         extensions: [ '.js', '.jsx' ],
@@ -75,7 +76,8 @@ var serverConfig = {
     target: 'node',
     output: {
         path: Path.resolve('./server/client'),
-        filename: 'app.js',
+        filename: 'front-end.js',
+        chunkFilename: '[name].js',
         libraryTarget: 'commonjs2',
         publicPath: '/starwars-react',
     },

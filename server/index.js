@@ -5,7 +5,7 @@ var CrossFetch = require('cross-fetch');
 var DNSCache = require('dnscache');
 var SpiderDetector = require('spider-detector')
 var ReactDOMServer = require('react-dom/server');
-var ClientApp = require('./client/app');
+var FrontEnd = require('./client/front-end');
 
 // enable DNS caching
 DNSCache({ enable: true, ttl: 300, cachesize: 100 });
@@ -30,10 +30,10 @@ function handlePageRequest(req, res) {
     var noScript = (req.query.js === '0')
     var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
     var options = { host, path, target, fetch: CrossFetch };
-    ClientApp.render(options).then((rootNode) => {
-        var appHTML = ReactDOMServer.renderToString(rootNode);
+    FrontEnd.render(options).then((rootNode) => {
+        var frontEndHTML = ReactDOMServer.renderToString(rootNode);
         var indexHTMLPath = `${__dirname}/client/index.html`;
-        return replaceHTMLComment(indexHTMLPath, 'APP', appHTML).then((html) => {
+        return replaceHTMLComment(indexHTMLPath, 'REACT', frontEndHTML).then((html) => {
             if (target === 'hydrate') {
                 // add <noscript> tag to redirect to SEO version
                 var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;

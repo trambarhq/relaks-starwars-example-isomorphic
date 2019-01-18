@@ -1,6 +1,6 @@
 import { createElement } from 'react';
 import { hydrate, render } from 'react-dom';
-import { Application } from 'application';
+import { FrontEnd } from 'front-end';
 import { routes } from 'routing';
 import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
@@ -28,17 +28,14 @@ if (typeof(window) === 'object') {
         routeManager.activate();
         await routeManager.start();
 
-        let appContainer = document.getElementById('app-container');
-        if (!appContainer) {
-            throw new Error('Unable to find app element in DOM');
-        }
-        let ssrElement = createElement(Application, { dataSource, routeManager, ssr: 'hydrate' });
+        let container = document.getElementById('react-container');
+        let ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
         let seeds = await harvest(ssrElement, { seeds: true });
         Relaks.set('seeds', seeds);
-        hydrate(ssrElement, appContainer);
+        hydrate(ssrElement, container);
 
-        let appElement = createElement(Application, { dataSource, routeManager });
-        render(appElement, appContainer);
+        let csrElement = createElement(FrontEnd, { dataSource, routeManager });
+        render(csrElement, container);
     }
 
     window.addEventListener('load', initialize);
@@ -57,7 +54,7 @@ if (typeof(window) === 'object') {
         routeManager.activate();
         await routeManager.start(options.path);
 
-        let ssrElement = createElement(Application, { dataSource, routeManager, ssr: options.target });
+        let ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: options.target });
         return harvest(ssrElement);
     }
 
