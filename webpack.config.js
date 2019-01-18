@@ -71,6 +71,7 @@ var serverConfig = {
     output: {
         path: Path.resolve('./server/client'),
         filename: 'front-end.js',
+        chunkFilename: '[name].js',
         libraryTarget: 'commonjs2',
         publicPath: '/starwars',
     },
