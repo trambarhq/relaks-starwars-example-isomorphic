@@ -5,7 +5,7 @@ import { routes } from 'routing';
 import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest/preact';
-import Relaks from 'relaks/preact';
+import { plant } from 'relaks/preact';
 
 const dataSourceBaseURL = '/starwars/api';
 const pageBasePath = '/starwars';
@@ -30,8 +30,8 @@ if (typeof(window) === 'object') {
 
         let container = document.getElementById('react-container');
         let ssrElement = h(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
-        let seeds = await harvest(ssrElement);
-        Relaks.set('seeds', seeds);
+        let seeds = await harvest(ssrElement, { seeds: true });
+        plant(seeds);
         render(ssrElement, container, container.firstChild);
 
         let csrElement = h(FrontEnd, { dataSource, routeManager });

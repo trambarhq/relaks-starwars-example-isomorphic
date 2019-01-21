@@ -153,7 +153,7 @@ async function initialize(evt) {
     let container = document.getElementById('react-container');
     let ssrElement = h(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
     let seeds = await harvest(ssrElement);
-    Relaks.set('seeds', seeds);
+    plant(seeds);
     render(ssrElement, container, container.firstChild);
 
     let csrElement = h(FrontEnd, { dataSource, routeManager });
