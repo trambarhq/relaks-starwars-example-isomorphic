@@ -147,7 +147,7 @@ async function initialize(evt) {
     let container = document.getElementById('react-container');
     let ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
     let seeds = await harvest(ssrElement, { seeds: true });
-    Relaks.set('seeds', seeds);
+    plant(seeds);
     hydrate(ssrElement, container);
 
     let csrElement = createElement(FrontEnd, { dataSource, routeManager });
