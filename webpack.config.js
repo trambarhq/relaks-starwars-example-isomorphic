@@ -63,9 +63,11 @@ var clientConfig = {
             chunkFilename: "[id].css"
         }),
     ],
+    devtool: (event === 'build') ? 'source-map' : 'inline-source-map',
 };
 
 var serverConfig = {
+    mode: clientConfig.mode,
     context: clientConfig.context,
     entry: clientConfig.entry,
     target: 'node',
@@ -89,6 +91,7 @@ var serverConfig = {
             chunkFilename: "[id].css"
         }),
     ],
+    devtool: clientConfig.devtool,
 };
 
 var configs = module.exports = [ serverConfig, clientConfig ];
