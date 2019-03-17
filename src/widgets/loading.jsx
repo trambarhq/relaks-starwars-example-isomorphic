@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 function Loading() {
     return (
@@ -9,8 +9,6 @@ function Loading() {
         </div>
     );
 }
-
-Loading.displayName = 'Loading';
 
 export {
     Loading as default,

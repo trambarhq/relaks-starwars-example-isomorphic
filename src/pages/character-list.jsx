@@ -1,60 +1,34 @@
-import React, { PureComponent } from 'react';
-import { AsyncComponent } from 'relaks';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks/hooks';
 import List from 'widgets/list';
 import Loading from 'widgets/loading';
 
-class CharacterList extends AsyncComponent {
-    static displayName = 'CharacterList';
+async function CharacterList(props) {
+    const { route, swapi } = props;
+    const [ show ] = useProgress();
 
-    /**
-     * Retrieve remote data and render the synchronize half of this component
-     *
-     * @param  {Meanwhile}  meanwhile
-     *
-     * @return {VNode}
-     */
-    async renderAsync(meanwhile) {
-        let { route, swapi } = this.props;
-        let props = {
-            route,
-        };
-        meanwhile.show(<CharacterListSync {...props} />);
-        props.people = await swapi.fetchList('/people/');
-        props.people.more();
-        return <CharacterListSync {...props} />;
-    }
-}
+    render();
+    const people = await swapi.fetchList('/people/');
+    render();
 
-class CharacterListSync extends PureComponent {
-    static displayName = 'CharacterListSync';
+    people.more();
 
-    /**
-     * Render the component, making best effort using what props are given
-     *
-     * @return {VNode}
-     */
-    render() {
-        let { people, route } = this.props;
+    function render() {
         if (!people) {
             return <Loading />;
         }
-        let listProps = {
-            items: people,
-            field: 'name',
-            pageName: 'character-summary',
-            route,
-        };
-        return (
+        show(
             <div>
                 <h1>Characters</h1>
-                <List {...listProps} />
+                <List items={people} field="name" pageName="character-summary" route={route} />
             </div>
         );
-    }
+    };
 }
 
+const asyncComponent = Relaks(CharacterList);
+
 export {
-    CharacterList as default,
-    CharacterList,
-    CharacterListSync
+    asyncComponent as default,
+    asyncComponent as CharacterList,
 };

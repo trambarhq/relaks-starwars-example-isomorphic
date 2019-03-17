@@ -1,59 +1,35 @@
-import React, { PureComponent } from 'react';
-import { AsyncComponent } from 'relaks';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks/hooks';
 import List from 'widgets/list';
 import Loading from 'widgets/loading';
 
-class SpeciesList extends AsyncComponent {
-    static displayName = 'SpeciesList';
+async function SpeciesList(props) {
+    const { route, swapi } = props;
+    const [ show ] = useProgress();
 
-    /**
-     * Retrieve remote data and render the synchronize half of this component
-     *
-     * @param  {Meanwhile}  meanwhile
-     *
-     * @return {VNode}
-     */
-    async renderAsync(meanwhile) {
-        let { route, swapi } = this.props;
-        let props = {
-            route,
-        };
-        meanwhile.show(<SpeciesListSync {...props} />);
-        props.species = await swapi.fetchList('/species/');
-        props.species.more();
-        return <SpeciesListSync {...props} />;
-    }
-}
+    render();
+    const species = await swapi.fetchList('/species/');
+    render();
 
-class SpeciesListSync extends PureComponent {
-    static displayName = 'SpeciesListSync';
+    species.more();
 
-    /**
-     * Render the component, making best effort using what props are given
-     *
-     * @return {VNode}
-     */
-    render() {
-        let { species, route } = this.props;
+    function render() {
         if (!species) {
-            return <Loading />;
+            show(<Loading />);
+        } else {
+            show(
+                <div>
+                    <h1>Species</h1>
+                    <List items={species} field="name" pageName="species-summary" route={route} />
+                </div>
+            );
         }
-        let listProps = {
-            items: species,
-            pageName: 'species-summary',
-            route,
-        };
-        return (
-            <div>
-                <h1>Species</h1>
-                <List {...listProps} />
-            </div>
-        );
     }
 }
+
+const asyncComponent = Relaks(SpeciesList);
 
 export {
-    SpeciesList as default,
-    SpeciesList,
-    SpeciesListSync
+    asyncComponent as default,
+    asyncComponent as SpeciesList,
 };

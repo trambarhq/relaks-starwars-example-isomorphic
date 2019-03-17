@@ -1,59 +1,35 @@
-import React, { PureComponent } from 'react';
-import { AsyncComponent } from 'relaks';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks/hooks';
 import List from 'widgets/list';
 import Loading from 'widgets/loading';
 
-class VehicleList extends AsyncComponent {
-    static displayName = 'VehicleList';
+async function VehicleList(props) {
+    const { route, swapi } = props;
+    const [ show ] = useProgress();
 
-    /**
-     * Retrieve remote data and render the synchronize half of this component
-     *
-     * @param  {Meanwhile}  meanwhile
-     *
-     * @return {VNode}
-     */
-    async renderAsync(meanwhile) {
-        let { route, swapi } = this.props;
-        let props = {
-            route,
-        };
-        meanwhile.show(<VehicleListSync {...props} />);
-        props.vehicles = await swapi.fetchList('/vehicles/');
-        props.vehicles.more();
-        return <VehicleListSync {...props} />;
-    }
-}
+    render();
+    const vehicles = await swapi.fetchList('/vehicles/');
+    render();
 
-class VehicleListSync extends PureComponent {
-    static displayName = 'VehicleListSync';
+    vehicles.more();
 
-    /**
-     * Render the component, making best effort using what props are given
-     *
-     * @return {VNode}
-     */
-    render() {
-        let { vehicles, route } = this.props;
+    function render() {
         if (!vehicles) {
-            return <Loading />;
+            show(<Loading />);
+        } else {
+            show(
+                <div>
+                    <h1>Vehicles</h1>
+                    <List items={vehicles} field="name" pageName="vehicle-summary" route={route} />
+                </div>
+            );
         }
-        let listProps = {
-            items: vehicles,
-            pageName: 'vehicle-summary',
-            route,
-        };
-        return (
-            <div>
-                <h1>Vehicles</h1>
-                <List {...listProps} />
-            </div>
-        );
     }
 }
+
+const asyncComponent = Relaks(VehicleList);
 
 export {
-    VehicleList as default,
-    VehicleList,
-    VehicleListSync
+    asyncComponent as default,
+    asyncComponent as VehicleList,
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 function NavBar(props) {
     let { route } = props;
@@ -29,8 +29,6 @@ function NavBar(props) {
     );
 }
 
-NavBar.displayName = 'NavBar';
-
 function Button(props) {
     let { route } = props;
     let linkProps = {
@@ -39,8 +37,6 @@ function Button(props) {
     };
     return <a {...linkProps}>{props.children}</a>;
 }
-
-Button.displayName = 'Button';
 
 export {
     NavBar as default,

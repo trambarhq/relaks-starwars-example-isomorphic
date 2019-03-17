@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 function List(props) {
     let { route, urls, items, field, pageName } = props;
@@ -10,7 +10,7 @@ function List(props) {
         }
         // deal with holes in the data set
         items = urls.map((url, index) => {
-            var item = (items) ? items[index] : null;
+            let item = (items) ? items[index] : null;
             if (!item) {
                 item = { url, pending: true };
             }
@@ -23,29 +23,23 @@ function List(props) {
     if (items.length === 0) {
         return <ul className="empty"><li><span>none</span></li></ul>;
     }
-    return (
-        <ul>
-        {
-            items.map((item) => {
-                let id = route.extractID(item.url);
-                let url = route.find(pageName, { id });
-                let text = item.pending ? '...' : item[field];
-                let linkProps = {
-                    href: url,
-                    className: (item.pending) ? 'pending' : undefined,
-                };
-                return <li key={id}><a {...linkProps}>{text}</a></li>;
-            })
-        }
-        </ul>
-    );
+    return <ul>{items.map(renderItem)}</ul>;
+
+    function renderItem(item, i) {
+        const id = route.extractID(item.url);
+        const url = route.find(pageName, { id });
+        const text = item.pending ? '...' : item[field];
+        const linkProps = {
+            href: url,
+            className: (item.pending) ? 'pending' : undefined,
+        };
+        return <li key={i}><a {...linkProps}>{text}</a></li>;
+    }
 }
 
 List.defaultProps = {
     field: 'name'
 };
-
-List.displayName = 'List';
 
 export {
     List as default,

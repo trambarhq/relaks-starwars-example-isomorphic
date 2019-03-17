@@ -13,14 +13,14 @@ const pageBasePath = '/starwars-react';
 if (typeof(window) === 'object') {
     async function initialize(evt) {
         // create data source
-        let host = `${location.protocol}//${location.host}`;
-        let dataSource = new DjangoDataSource({
+        const host = `${location.protocol}//${location.host}`;
+        const dataSource = new DjangoDataSource({
             baseURL: `${host}${dataSourceBaseURL}`,
         });
         dataSource.activate();
 
         // create route manager
-        let routeManager = new RouteManager({
+        const routeManager = new RouteManager({
             routes,
             basePath: pageBasePath,
             preloadingDelay: 2000,
@@ -28,33 +28,33 @@ if (typeof(window) === 'object') {
         routeManager.activate();
         await routeManager.start();
 
-        let container = document.getElementById('react-container');
-        let ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
-        let seeds = await harvest(ssrElement, { seeds: true });
+        const container = document.getElementById('react-container');
+        const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
+        const seeds = await harvest(ssrElement, { seeds: true });
         plant(seeds);
         hydrate(ssrElement, container);
 
-        let csrElement = createElement(FrontEnd, { dataSource, routeManager });
+        const csrElement = createElement(FrontEnd, { dataSource, routeManager });
         render(csrElement, container);
     }
 
     window.addEventListener('load', initialize);
 } else {
     async function serverSideRender(options) {
-        let dataSource = new DjangoDataSource({
+        const dataSource = new DjangoDataSource({
             baseURL: `${options.host}${dataSourceBaseURL}`,
             fetchFunc: options.fetch,
         });
         dataSource.activate();
 
-        let routeManager = new RouteManager({
+        const routeManager = new RouteManager({
             routes,
             basePath: pageBasePath,
         });
         routeManager.activate();
         await routeManager.start(options.path);
 
-        let ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: options.target });
+        const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: options.target });
         return harvest(ssrElement);
     }
 

@@ -1,59 +1,35 @@
-import React, { PureComponent } from 'react';
-import { AsyncComponent } from 'relaks';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks/hooks';
 import List from 'widgets/list';
 import Loading from 'widgets/loading';
 
-class PlanetList extends AsyncComponent {
-    static displayName = 'PlanetList';
+async function PlanetList(props) {
+    const { route, swapi } = props;
+    const [ show ] = useProgress();
 
-    /**
-     * Retrieve remote data and render the synchronize half of this component
-     *
-     * @param  {Meanwhile}  meanwhile
-     *
-     * @return {VNode}
-     */
-    async renderAsync(meanwhile) {
-        let { route, swapi } = this.props;
-        let props = {
-            route,
-        };
-        meanwhile.show(<PlanetListSync {...props} />);
-        props.planets = await swapi.fetchList('/planets/');
-        props.planets.more();
-        return <PlanetListSync {...props} />;
-    }
-}
+    render();
+    const planets = await swapi.fetchList('/planets/');
+    render();
 
-class PlanetListSync extends PureComponent {
-    static displayName = 'PlanetListSync';
+    planets.more();
 
-    /**
-     * Render the component, making best effort using what props are given
-     *
-     * @return {VNode}
-     */
-    render() {
-        let { planets, route } = this.props;
+    function render() {
         if (!planets) {
-            return <Loading />;
+            show(<Loading />);
+        } else {
+            show(
+                <div>
+                    <h1>Planets</h1>
+                    <List items={planets} field="name" pageName="planet-summary" route={route} />
+                </div>
+            );
         }
-        let listProps = {
-            items: planets,
-            pageName: 'planet-summary',
-            route,
-        };
-        return (
-            <div>
-                <h1>Planets</h1>
-                <List {...listProps} />
-            </div>
-        );
     }
 }
+
+const asyncComponent = Relaks(PlanetList);
 
 export {
-    PlanetList as default,
-    PlanetList,
-    PlanetListSync
+    asyncComponent as default,
+    asyncComponent as PlanetList,
 };

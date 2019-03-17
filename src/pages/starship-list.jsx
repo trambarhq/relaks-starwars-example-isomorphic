@@ -1,59 +1,35 @@
-import React, { PureComponent } from 'react';
-import { AsyncComponent } from 'relaks';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks/hooks';
 import List from 'widgets/list';
 import Loading from 'widgets/loading';
 
-class StarshipList extends AsyncComponent {
-    static displayName = 'StarshipList';
+async function StarshipList(props) {
+    const { route, swapi } = props;
+    const [ show ] = useProgress();
 
-    /**
-     * Retrieve remote data and render the synchronize half of this component
-     *
-     * @param  {Meanwhile}  meanwhile
-     *
-     * @return {VNode}
-     */
-    async renderAsync(meanwhile) {
-        let { route, swapi } = this.props;
-        let props = {
-            route,
-        };
-        meanwhile.show(<StarshipListSync {...props} />);
-        props.starships = await swapi.fetchList('/starships/');
-        props.starships.more();
-        return <StarshipListSync {...props} />;
-    }
-}
+    render();
+    const starships = await swapi.fetchList('/starships/');
+    render();
 
-class StarshipListSync extends PureComponent {
-    static displayName = 'StarshipListSync';
+    starships.more();
 
-    /**
-     * Render the component, making best effort using what props are given
-     *
-     * @return {VNode}
-     */
-    render() {
-        let { starships, route } = this.props;
+    function render() {
         if (!starships) {
-            return <Loading />;
+            show(<Loading />);
+        } else {
+            show(
+                <div>
+                    <h1>Starships</h1>
+                    <List items={starships} field="name" pageName="starship-summary" route={route} />
+                </div>
+            );
         }
-        let listProps = {
-            items: starships,
-            pageName: 'starship-summary',
-            route,
-        };
-        return (
-            <div>
-                <h1>Starships</h1>
-                <List {...listProps} />
-            </div>
-        );
     }
 }
+
+const asyncComponent = Relaks(StarshipList);
 
 export {
-    StarshipList as default,
-    StarshipList,
-    StarshipListSync
+    asyncComponent as default,
+    asyncComponent as StarshipList,
 };
