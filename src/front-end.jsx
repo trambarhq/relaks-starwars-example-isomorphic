@@ -1,34 +1,36 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import SWAPI from 'swapi';
+import { useEventTime } 'relaks';
+import { SWAPI } from 'swapi';
 import { Route } from 'routing';
 import NavBar from 'widgets/nav-bar';
-import 'relaks/hooks';
 import 'style.scss';
 
 function FrontEnd(props) {
-    const { routeManager, dataSource } = props;
-    const [ routeChange, setRouteChange ] = useState();
-    const [ swapiChange, setSWAPIChange ] = useState();
+    const { routeManager, dataSource, ssr } = props;
+    const [ routeChanged, setRouteChanged ] = useEventTime();
+    const [ swapiChanged, setSWAPIChanged ] = useEventTime();
     const route = useMemo(() => {
         return new Route(routeManager);
-    }, [ routeManager, routeChange ]);
+    }, [ routeManager, routeChanged ]);
     const swapi = useMemo(() => {
-        return new SWAPI(dataSource);
-    }, [ dataSource, swapiChange ]);
+        return new SWAPI(dataSource, ssr);
+    }, [ dataSource, ssr, swapiChanged ]);
 
     useEffect(() => {
-        routeManager.addEventListener('change', setRouteChange);
-        dataSource.addEventListener('change', setSWAPIChange);
+        routeManager.addEventListener('change', setRouteChanged);
+        dataSource.addEventListener('change', setSWAPIChanged);
 
         return () => {
-            routeManager.addEventListener('change', setRouteChange);
-            dataSource.addEventListener('change', setSWAPIChange);
+            routeManager.removeEventListener('change', setRouteChanged);
+            dataSource.removeEventListener('change', setSWAPIChanged);
         };
-    });
+    }, [ routeManager, dataSource ]);
     useEffect(() => {
-        const body = document.body;
-        body.className = body.className.replace(/\s*ssr/, '');
-    });
+        if (!ssr) {
+            const body = document.body;
+            body.className = body.className.replace(/\s*ssr/, '');
+        }
+    }, [ ssr ]);
 
     const PageComponent = route.params.module.default;
     return (
