@@ -1,7 +1,7 @@
 import React from 'react';
-import Relaks, { useProgress } from 'relaks/hooks';
-import List from 'widgets/list';
-import Loading from 'widgets/loading';
+import Relaks, { useProgress } from 'relaks';
+import { List } from 'widgets/list';
+import { Loading } from 'widgets/loading';
 
 async function CharacterList(props) {
     const { route, swapi } = props;
@@ -15,20 +15,20 @@ async function CharacterList(props) {
 
     function render() {
         if (!people) {
-            return <Loading />;
+            show(<Loading />);
+        } else {
+            show(
+                <div>
+                    <h1>Characters</h1>
+                    <List items={people} field="name" pageName="character-summary" route={route} />
+                </div>
+            );
         }
-        show(
-            <div>
-                <h1>Characters</h1>
-                <List items={people} field="name" pageName="character-summary" route={route} />
-            </div>
-        );
     };
 }
 
-const asyncComponent = Relaks(CharacterList);
+const component = Relaks.memo(CharacterList);
 
 export {
-    asyncComponent as default,
-    asyncComponent as CharacterList,
+    component as default,
 };

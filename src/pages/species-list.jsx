@@ -1,7 +1,7 @@
 import React from 'react';
-import Relaks, { useProgress } from 'relaks/hooks';
-import List from 'widgets/list';
-import Loading from 'widgets/loading';
+import Relaks, { useProgress } from 'relaks';
+import { List } from 'widgets/list';
+import { Loading } from 'widgets/loading';
 
 async function SpeciesList(props) {
     const { route, swapi } = props;
@@ -27,9 +27,8 @@ async function SpeciesList(props) {
     }
 }
 
-const asyncComponent = Relaks(SpeciesList);
+const component = Relaks.memo(SpeciesList);
 
 export {
-    asyncComponent as default,
-    asyncComponent as SpeciesList,
+    component as default,
 };

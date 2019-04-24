@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
-import Relaks, { useProgress } from 'relaks/hooks';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks';
 import { List } from 'widgets/list';
-import Loading from 'widgets/loading';
+import { Loading } from 'widgets/loading';
 
 async function FilmPage(props) {
     const { route, swapi } = props;
@@ -48,9 +48,8 @@ async function FilmPage(props) {
     }
 }
 
-const asyncComponent = Relaks(FilmPage);
+const component = Relaks.memo(FilmPage);
 
 export {
-    asyncComponent as default,
-    asyncComponent as FilmPage,
+    component as default,
 };

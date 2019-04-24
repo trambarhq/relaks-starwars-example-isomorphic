@@ -1,28 +1,28 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useEventTime } 'relaks';
+import React, { useEffect, useMemo } from 'react';
+import { useEventTime } from 'relaks';
 import { SWAPI } from 'swapi';
 import { Route } from 'routing';
-import NavBar from 'widgets/nav-bar';
+import { NavBar } from 'widgets/nav-bar';
 import 'style.scss';
 
 function FrontEnd(props) {
     const { routeManager, dataSource, ssr } = props;
     const [ routeChanged, setRouteChanged ] = useEventTime();
-    const [ swapiChanged, setSWAPIChanged ] = useEventTime();
+    const [ dataChanged, setDataChanged ] = useEventTime();
     const route = useMemo(() => {
         return new Route(routeManager);
     }, [ routeManager, routeChanged ]);
     const swapi = useMemo(() => {
         return new SWAPI(dataSource, ssr);
-    }, [ dataSource, ssr, swapiChanged ]);
+    }, [ dataSource, ssr, dataChanged ]);
 
     useEffect(() => {
         routeManager.addEventListener('change', setRouteChanged);
-        dataSource.addEventListener('change', setSWAPIChanged);
+        dataSource.addEventListener('change', setDataChanged);
 
         return () => {
             routeManager.removeEventListener('change', setRouteChanged);
-            dataSource.removeEventListener('change', setSWAPIChanged);
+            dataSource.removeEventListener('change', setDataChanged);
         };
     }, [ routeManager, dataSource ]);
     useEffect(() => {
@@ -44,6 +44,5 @@ function FrontEnd(props) {
 }
 
 export {
-    FrontEnd as default,
     FrontEnd
 };

@@ -14,7 +14,7 @@ var clientConfig = {
     entry: './main',
     output: {
         path: Path.resolve('./server/www'),
-        publicPath: '/starwars-react/',
+        publicPath: '/starwars/',
         filename: 'front-end.js',
         chunkFilename: '[name].js',
     },
@@ -30,7 +30,7 @@ var clientConfig = {
                 exclude: /node_modules/,
                 query: {
                     presets: [
-                        'env',
+                        [ 'env', { modules: false } ],
                         'react',
                         'stage-0',
                     ],
@@ -43,12 +43,12 @@ var clientConfig = {
                 }
             },
             {
-                test: /\.css$/,
-                use: [ MiniCSSExtractPlugin.loader, 'css-loader' ],
-            },
-            {
                 test: /\.scss$/,
-                use: [ MiniCSSExtractPlugin.loader, 'css-loader', 'sass-loader' ],
+                use: [
+                    MiniCSSExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader'
+                ],
             },
         ]
     },
@@ -63,20 +63,23 @@ var clientConfig = {
             chunkFilename: "[id].css"
         }),
     ],
+    optimization: {
+        concatenateModules: false,
+    },
     devtool: (event === 'build') ? 'source-map' : 'inline-source-map',
 };
 
 var serverConfig = {
     mode: clientConfig.mode,
     context: clientConfig.context,
-    entry: clientConfig.entry,
+    entry: './ssr',
     target: 'node',
     output: {
         path: Path.resolve('./server/client'),
         filename: 'front-end.js',
         chunkFilename: '[name].js',
         libraryTarget: 'commonjs2',
-        publicPath: '/starwars-react',
+        publicPath: '/starwars',
     },
     resolve: clientConfig.resolve,
     module: clientConfig.module,
@@ -96,9 +99,9 @@ var serverConfig = {
 
 var configs = module.exports = [ serverConfig, clientConfig ];
 
-
 // copy webpack.resolve.js into webpack.debug.js to resolve Babel presets
 // and plugins to absolute paths, required when linked modules are used
 if (FS.existsSync('./webpack.debug.js')) {
     configs.map(require('./webpack.debug.js'));
 }
+console.log(configs[0].resolve);

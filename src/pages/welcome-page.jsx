@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 function WelcomePage(props) {
     return (
@@ -10,5 +10,4 @@ function WelcomePage(props) {
 
 export {
     WelcomePage as default,
-    WelcomePage
 };

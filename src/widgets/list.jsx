@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 function List(props) {
-    let { route, urls, items, field, pageName } = props;
+    const { route, field, pageName } = props;
+    let { urls, items } = props;
     if (urls) {
         // accept single URL and object
         if (typeof(urls) === 'string') {
@@ -28,12 +29,13 @@ function List(props) {
     function renderItem(item, i) {
         const id = route.extractID(item.url);
         const url = route.find(pageName, { id });
-        const text = item.pending ? '...' : item[field];
-        const linkProps = {
-            href: url,
-            className: (item.pending) ? 'pending' : undefined,
-        };
-        return <li key={i}><a {...linkProps}>{text}</a></li>;
+        const text = (item.pending) ? '...' : item[field];
+        const className = (item.pending) ? 'pending' : undefined;
+        return (
+            <li key={i}>
+                <a className={className} href={url}>{text}</a>
+            </li>
+        );
     }
 }
 
@@ -42,6 +44,5 @@ List.defaultProps = {
 };
 
 export {
-    List as default,
     List
 };

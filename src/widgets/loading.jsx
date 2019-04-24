@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 function Loading() {
     return (
@@ -11,6 +11,5 @@ function Loading() {
 }
 
 export {
-    Loading as default,
     Loading
 };

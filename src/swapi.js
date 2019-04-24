@@ -51,6 +51,5 @@ class SWAPI {
 }
 
 export {
-    SWAPI as default,
     SWAPI,
 };
