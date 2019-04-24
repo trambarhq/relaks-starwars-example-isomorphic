@@ -10,16 +10,6 @@ This SSR page is completely static--it's just HTML. Unless the visitor has super
 
 With proper page caching, time-to-first-impression can match that of a static HTML page.
 
-* [Live demo](#live-demo)
-* [Getting started](#getting-started)
-* [SSR and Relaks](#ssr-and-relaks)
-* [Adjustments to WebPack configuration](#adjustments-to-webpack-configuration)
-* [Client-side code changes](#client-side-code-changes)
-* [Adjustments to HTML template](#adjustments-to-html-template)
-* [Server-side code](#server-side-code)
-* [Usage scenarios](#usage-scenarios)
-* [Final words](#final-words)
-
 ## Live demo
 
 You can see the code in action [here](https://trambar.io/starwars-react/characters/). When the page is rendered on the server side, it has a reddish background color. The color is removed once the client takes over. This can happen in less than a second as the front-end is fairly small. You might want to activate bandwidth throttling to slow things down a bit. Hit the browser's refresh button to to see the SSR version again.
@@ -30,7 +20,7 @@ If you wish to see the SEO version, disable JavaScript for the site. On Chrome, 
 
 ## Getting started
 
-To see the code running in debug mode, first clone this repository. In the working folder, run `npm install`. Once that's done, run `npm run watch` to rebuild the code with debugging enabled. In a different terminal, run `node server/index.js`. Open a browser window and enter `http://localhost:8080/starwars-react/` as the location. To see the server-side code in debug mode, run `node --inspect server/index.js`. Open a Chrome window and navigate to `chrome://inspect/`. The server script to be listed under **Remote Target**. Click on it to enter the debugger.
+To see the code running in debug mode, first clone this repository. In the working folder, run `npm install`. Once that's done, run `npm run watch` to rebuild the code with debugging enabled. In a different terminal, run `node server/index.js`. Open a browser window and enter `http://localhost:8080/starwars/` as the location. To see the server-side code in debug mode, run `node --inspect server/index.js`. Open a Chrome window and navigate to `chrome://inspect/`. The server script to be listed under **Remote Target**. Click on it to enter the debugger.
 
 ## SSR and Relaks
 
@@ -48,12 +38,14 @@ The variable `clientConfig` holds the configuration for the client build. The va
 
 ```JavaScript
 var serverConfig = {
+    mode: clientConfig.mode,
     context: clientConfig.context,
-    entry: clientConfig.entry,
+    entry: './ssr',
     target: 'node',
     output: {
         path: Path.resolve('./server/client'),
         filename: 'front-end.js',
+        chunkFilename: '[name].js',
         libraryTarget: 'commonjs2',
         publicPath: '/starwars',
     },
@@ -61,12 +53,14 @@ var serverConfig = {
     module: clientConfig.module,
     plugins: [
         new NamedChunksPlugin,
-        new NamedModulesPlugin,
         new HtmlWebpackPlugin({
             template: Path.resolve(`./src/index.html`),
             filename: Path.resolve(`./server/client/index.html`),
         }),
-        new ExtractTextPlugin('styles.css'),
+        new MiniCSSExtractPlugin({
+            filename: "[name].css",
+            chunkFilename: "[id].css"
+        }),
     ],
     devtool: clientConfig.devtool,
 };
@@ -81,25 +75,41 @@ Another thing we need to do is extract CSS rules to a separate .css file instead
 The source file [main.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/react/src/main.js) serves as our front-end's entry point. In the previous examples, all it does is render the `FrontEnd` component into a DIV in the DOM. To support SSR, we need to make the code behave differently when it's running on the server. When the `window` object is absent, the following code path is used:
 
 ```javascript
-async function serverSideRender(options) {
-    let dataSource = new DjangoDataSource({
+import { createElement } from 'react';
+import { renderToString } from 'react-dom/server';
+import { FrontEnd } from 'front-end';
+import { routes } from 'routing';
+import DjangoDataSource from 'relaks-django-data-source';
+import RouteManager from 'relaks-route-manager';
+import { harvest } from 'relaks-harvest';
+
+const dataSourceBaseURL = '/starwars/api';
+const basePath = '/starwars';
+
+async function render(options) {
+    const dataSource = new DjangoDataSource({
         baseURL: `${options.host}${dataSourceBaseURL}`,
         fetchFunc: options.fetch,
     });
     dataSource.activate();
 
-    let routeManager = new RouteManager({
+    const routeManager = new RouteManager({
         routes,
-        basePath: pageBasePath,
+        basePath,
     });
     routeManager.activate();
     await routeManager.start(options.path);
 
-    let ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: options.target });
-    return harvest(ssrElement);
+    const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: options.target });
+    const rootNode = await harvest(ssrElement);
+    const html = renderToString(rootNode);
+    return html;
 }
 
-exports.render = serverSideRender;
+export {
+    render,
+    basePath,
+};
 ```
 
 The function above is called from Node.js. It first initiates the data source and route manager, using options provided by the server-side code. Then it creates the `FrontEnd` element. This is given to `harvest()`, whose return value is a promise of the eventual results.
@@ -129,39 +139,52 @@ When we're optimizing for search, we place all available contents into the stati
 When the `window` object is present, the front-end code is running in a web-browser. The following code path is used instead:
 
 ```javascript
+import { createElement } from 'react';
+import { hydrate, render } from 'react-dom';
+import { FrontEnd } from 'front-end';
+import { routes } from 'routing';
+import DjangoDataSource from 'relaks-django-data-source';
+import RouteManager from 'relaks-route-manager';
+import { harvest } from 'relaks-harvest';
+import { plant } from 'relaks';
+
+window.addEventListener('load', initialize);
+
+const dataSourceBaseURL = '/starwars/api';
+const basePath = '/starwars';
+
 async function initialize(evt) {
-    let host = `${location.protocol}//${location.host}`;
-    let dataSource = new DjangoDataSource({
+    // create data source
+    const host = `${location.protocol}//${location.host}`;
+    const dataSource = new DjangoDataSource({
         baseURL: `${host}${dataSourceBaseURL}`,
     });
     dataSource.activate();
 
-    let routeManager = new RouteManager({
+    // create route manager
+    const routeManager = new RouteManager({
         routes,
-        basePath: pageBasePath,
-        preloadingDelay: 2000,
+        basePath,
     });
     routeManager.activate();
     await routeManager.start();
 
-    let container = document.getElementById('react-container');
-    let ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
-    let seeds = await harvest(ssrElement, { seeds: true });
+    const container = document.getElementById('react-container');
+    const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
+    const seeds = await harvest(ssrElement, { seeds: true });
     plant(seeds);
     hydrate(ssrElement, container);
 
-    let csrElement = createElement(FrontEnd, { dataSource, routeManager });
+    const csrElement = createElement(FrontEnd, { dataSource, routeManager });
     render(csrElement, container);
 }
-
-window.addEventListener('load', initialize);
 ```
 
 The code is almost the same as before. The critical addition here is the call to `harvest()`. It's used to generate the same contents that the server had done. We pass the option `{ seeds: true }` so that function would return the rendering results of asynchronous components. These "seeds" are given to Relaks, which will use them during the initial rendering cycle in lieu of calling `renderAsync()`.
 
 In the first `FrontEnd` element, `ssr` is set to `hydrate`, matching what was done on the server. In certain usage scenarios, the prop can be used to bypass operations that only make sense in the CSR context. For example, suppose a section in our front-end uses the [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) to find shops near the visitor. We don't want this code to run in Node.js, since the capability simply isn't there. We also don't want this code to run in the browser during our initial dry-run, since obtaining the user's location requires permission. `harvest()` would otherwise end up getting stuck on a promise that isn't fulfilled until the user click the "Allow" button.
 
-`ReactDOM.hydrate()` is used to render the front-end element into an already populated DOM node. See the [React documentation](https://reactjs.org/docs/react-dom.html#hydrate) for more details.
+`hydrate()` is used to render the front-end element into an already populated DOM node. See the [React documentation](https://reactjs.org/docs/react-dom.html#hydrate) for more details.
 
 The second `FrontEnd` element is used to turn off the `ssr` flag.
 
@@ -189,46 +212,19 @@ The class name allows us to style the page a little differently depending on whe
 Our server-side code consists of a single script: [index.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/react/server/index.js). It uses [Express](https://expressjs.com/) to handle page requests. The following function is responsible for generating SSR pages:
 
 ```javascript
-function handlePageRequest(req, res) {
-    var host = getHostLocation(req);
-    var path = req.url;
-    var noScript = (req.query.js === '0')
-    var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
-    var options = { host, path, target, fetch: CrossFetch };
-    FrontEnd.render(options).then((rootNode) => {
-        var frontEndHTML = ReactDOMServer.renderToString(rootNode);
-        var indexHTMLPath = `${__dirname}/client/index.html`;
-        return replaceHTMLComment(indexHTMLPath, 'APP', frontEndHTML).then((html) => {
-            if (target === 'hydrate') {
-                // add <noscript> tag to redirect to SEO version
-                var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
-                html += `<noscript>${meta}</noscript>`;
-            }
-            res.type('html').send(html);
-        });
-    }).catch((err) => {
-        handleRequestError(res, err);
-    });
-}
-```
-
-For compatibility purpose we're not using the ES7 `await` operator. The code above is equivalent to the following:
-
-```javascript
-async function handlePageRequest(req, res) {    
+async function handlePageRequest(req, res) {
     try {
-        let host = getHostLocation(req);
-        let path = req.url;
-        let noScript = (req.query.js === '0')
-        let target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
-        let options = { host, path, target, fetch: CrossFetch };
-        let rootNode = await FrontEnd.render(options);
-        let frontEndHTML = ReactDOMServer.renderToString(rootNode);
-        let indexHTMLPath = `${__dirname}/client/index.html`;
-        let html = await replaceHTMLComment(indexHTMLPath, 'APP', frontEndHTML);
+        const host = getHostLocation(req);
+        const path = req.url;
+        const noScript = (req.query.js === '0');
+        const target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
+        const options = { host, path, target, fetch: CrossFetch };
+        const frontEndHTML = await FrontEnd.render(options);
+        const indexHTMLPath = `${__dirname}/client/index.html`;
+        let html = await replaceHTMLComment(indexHTMLPath, 'REACT', frontEndHTML);
         if (target === 'hydrate') {
             // add <noscript> tag to redirect to SEO version
-            var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
+            const meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
             html += `<noscript>${meta}</noscript>`;
         }
         res.type('html').send(html);
