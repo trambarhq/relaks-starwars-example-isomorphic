@@ -45,6 +45,5 @@ function Button(props) {
 Button.displayName = 'Button';
 
 export {
-    NavBar as default,
     NavBar
 };

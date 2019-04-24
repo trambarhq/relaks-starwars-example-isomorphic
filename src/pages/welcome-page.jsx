@@ -4,7 +4,7 @@ import { h, render, Component } from 'preact';
 
 class WelcomePage extends Component {
     static displayName = 'WelcomePage';
-    
+
     /**
      * Render the component
      *
@@ -21,5 +21,4 @@ class WelcomePage extends Component {
 
 export {
     WelcomePage as default,
-    WelcomePage
 };

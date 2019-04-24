@@ -1,7 +1,7 @@
 import { h, Component } from 'preact';
 import SWAPI from 'swapi';
 import { Route } from 'routing';
-import NavBar from 'widgets/nav-bar';
+import { NavBar } from 'widgets/nav-bar';
 import 'relaks/preact';
 import 'style.scss';
 
@@ -12,7 +12,7 @@ class FrontEnd extends Component {
 
     constructor(props) {
         super(props);
-        let { routeManager, dataSource } = this.props;
+        const { routeManager, dataSource } = this.props;
         this.state = {
             route: new Route(routeManager),
             swapi: new SWAPI(dataSource, props.ssr),
@@ -25,8 +25,8 @@ class FrontEnd extends Component {
      * @return {VNode}
      */
     render() {
-        let { route, swapi } = this.state;
-        let PageComponent = route.params.module.default;
+        const { route, swapi } = this.state;
+        const PageComponent = route.params.module.default;
         return (
             <div>
                 <NavBar route={route} />
@@ -41,11 +41,11 @@ class FrontEnd extends Component {
      * Added change handlers when component mounts
      */
     componentDidMount() {
-        let { routeManager, dataSource } = this.props;
+        const { routeManager, dataSource } = this.props;
         routeManager.addEventListener('change', this.handleRouteChange);
         dataSource.addEventListener('change', this.handleDataSourceChange);
 
-        var body = document.body;
+        const body = document.body;
         body.className = body.className.replace(/\s*ssr/, '');
     }
 
@@ -53,9 +53,9 @@ class FrontEnd extends Component {
      * Recreate swapi when ssr changes
      */
     componentDidUpdate(prevProps, prevState) {
-        let { dataSource, ssr } = this.props;
+        const { dataSource, ssr } = this.props;
         if (prevProps.ssr !== ssr) {
-            let swapi = new SWAPI(dataSource, ssr);
+            const swapi = new SWAPI(dataSource, ssr);
             this.setState({ swapi });
         }
     }
@@ -64,7 +64,7 @@ class FrontEnd extends Component {
      * Remove change handlers when component mounts
      */
     componentWillUnmount() {
-        let { routeManager, dataSource } = this.props;
+        const { routeManager, dataSource } = this.props;
         routeManager.removeEventListener('change', this.handleRouteChange);
         dataSource.removeEventListener('change', this.handleDataSourceChange);
     }

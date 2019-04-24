@@ -15,6 +15,5 @@ function Loading() {
 Loading.displayName = 'Loading';
 
 export {
-    Loading as default,
     Loading
 };

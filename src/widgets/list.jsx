@@ -50,6 +50,5 @@ List.defaultProps = {
 List.displayName = 'List';
 
 export {
-    List as default,
     List
 };

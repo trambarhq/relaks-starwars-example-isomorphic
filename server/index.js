@@ -1,21 +1,21 @@
-var FS = require('fs');
-var OS = require('os');
-var Express = require('express');
-var CrossFetch = require('cross-fetch');
-var DNSCache = require('dnscache');
-var SpiderDetector = require('spider-detector')
-var PreactSSR = require('preact-render-to-string');
-var FrontEnd = require('./client/front-end');
+const Util = require('util');
+const FS = require('fs');
+const OS = require('os');
+const Express = require('express');
+const CrossFetch = require('cross-fetch');
+const DNSCache = require('dnscache');
+const SpiderDetector = require('spider-detector')
+const FrontEnd = require('./client/front-end');
 
 // enable DNS caching
 DNSCache({ enable: true, ttl: 300, cachesize: 100 });
 
-var basePath = `starwars`;
-var basePathAPI = `${basePath}/api`;
-var perPage = 10;
-var serverPort = 8080;
+const basePath = `starwars`;
+const basePathAPI = `${basePath}/api`;
+const perPage = 10;
+const serverPort = 8080;
 
-var app = Express();
+const app = Express();
 app.set('json spaces', 2);
 app.use(SpiderDetector.middleware());
 app.use(`/${basePath}`, Express.static(`${__dirname}/www`));
@@ -24,109 +24,94 @@ app.get(`/${basePathAPI}/:table/`, handleListRequest);
 app.get(`/${basePath}/*`, handlePageRequest);
 app.listen(serverPort);
 
-function handlePageRequest(req, res) {
-    var host = getHostLocation(req);
-    var path = req.url;
-    var noScript = (req.query.js === '0')
-    var target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
-    var options = { host, path, target, fetch: CrossFetch };
-    FrontEnd.render(options).then((rootNode) => {
-        var frontEndHTML = PreactSSR.render(rootNode);
-        var indexHTMLPath = `${__dirname}/client/index.html`;
-        return replaceHTMLComment(indexHTMLPath, 'REACT', frontEndHTML).then((html) => {
-            if (target === 'hydrate') {
-                // add <noscript> tag to redirect to SEO version
-                var meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
-                html += `<noscript>${meta}</noscript>`;
-            }
-            res.type('html').send(html);
-        });
-    }).catch((err) => {
+async function handlePageRequest(req, res) {
+    try {
+        const host = getHostLocation(req);
+        const path = req.url;
+        const noScript = (req.query.js === '0')
+        const target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
+        const options = { host, path, target, fetch: CrossFetch };
+        const frontEndHTML = await FrontEnd.render(options);
+        const indexHTMLPath = `${__dirname}/client/index.html`;
+        let html = await replaceHTMLComment(indexHTMLPath, 'REACT', frontEndHTML);
+        if (target === 'hydrate') {
+            // add <noscript> tag to redirect to SEO version
+            const meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
+            html += `<noscript>${meta}</noscript>`;
+        }
+        res.type('html').send(html);
+    } catch (err) {
         handleRequestError(res, err);
-    });
+    }
 }
 
 function getHostLocation(req) {
     // handle situation when we're behind Nginx
-    var hostname = req.headers['x-forwarded-host'] || req.hostname;
-    var protocol = req.headers['x-forwarded-proto'] || req.protocol;
-    var port = req.headers['x-forwarded-port'] || serverPort;
-    var url = `${protocol}://${hostname}`;
+    const hostname = req.headers['x-forwarded-host'] || req.hostname;
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const port = req.headers['x-forwarded-port'] || serverPort;
+    let url = `${protocol}://${hostname}`;
     if ((protocol === 'http' && port !== 80) || (protocol === 'http' && port !== 443)) {
         url += `:${port}`;
     }
     return url;
 }
 
-function replaceHTMLComment(path, comment, newElement) {
-    return new Promise((resolve, reject) => {
-        FS.readFile(path, 'utf-8', (err, text) => {
-            if (!err) {
-                var tag = `<!--${comment}-->`;
-                var result = text.replace(tag, newElement);
-                resolve(result);
-            } else {
-                reject(err);
-            }
-        });
-    });
+const readFile = Util.promisify(FS.readFile);
+
+async function replaceHTMLComment(path, comment, newElement) {
+    const text = await readFile(path, 'utf-8');
+    const tag = `<!--${comment}-->`;
+    return text.replace(tag, newElement);
 }
 
-function handleObjectRequest(req, res) {
-    var host = getHostLocation(req);
-    var id = parseInt(req.params.id);
-    var table = req.params.table;
-    return loadTable(table).then((objects) => {
-        var object = objects.find((object) => {
+async function handleObjectRequest(req, res) {
+    try {
+        const host = getHostLocation(req);
+        const id = parseInt(req.params.id);
+        const table = req.params.table;
+        const objects = await loadTable(table);
+        const object = objects.find((object) => {
             return (object.id === id);
         });
         if (!object) {
             throw Error('Not found');
         }
-        var result = attachHyperlinkKeys(host, table, object);
+        const result = attachHyperlinkKeys(host, table, object);
         res.json(result);
-    }).catch((err) => {
+    } catch (err) {
         handleRequestError(res, err);
-    });
+    }
 }
 
-function handleListRequest(req, res) {
-    var host = getHostLocation(req);
-    var page = parseInt(req.query.page) || 1;
-    var table = req.params.table;
-    return loadTable(table).then((objects) => {
-        var start = (page - 1) * perPage;
-        var end = start + perPage;
-        var slice = objects.slice(start, end)
-        var count = objects.length;
-        var next = (end < count) ? getPageURL(host, table, page + 1) : null;
-        var prev = (page > 1) ? getPageURL(host, table, page - 1) : null;
-        var results = slice.map(attachHyperlinkKeys.bind(null, host, table));
+async function handleListRequest(req, res) {
+    try {
+        const host = getHostLocation(req);
+        const page = parseInt(req.query.page) || 1;
+        const table = req.params.table;
+        const objects = await loadTable(table);
+        const start = (page - 1) * perPage;
+        const end = start + perPage;
+        const slice = objects.slice(start, end)
+        const count = objects.length;
+        const next = (end < count) ? getPageURL(host, table, page + 1) : null;
+        const prev = (page > 1) ? getPageURL(host, table, page - 1) : null;
+        const results = slice.map(attachHyperlinkKeys.bind(null, host, table));
         res.json({ count, next, prev, results });
-    }).catch((err) => {
+    } catch (err) {
         handleRequestError(res, err);
-    });
+    }
 }
 
 function handleRequestError(res, err) {
+    console.error(err);
     res.type('text').status(400).send(err.stack);
 }
 
-function loadTable(table) {
-    var path = `${__dirname}/data/${table}.json`;
-    return new Promise((resolve, reject) => {
-        FS.readFile(path, 'utf-8', (err, json) => {
-            if (!err) {
-                try {
-                    resolve(JSON.parse(json));
-                } catch(err) {
-                    reject(err);
-                }
-            } else {
-                reject(err);
-            }
-        });
-    });
+async function loadTable(table) {
+    const path = `${__dirname}/data/${table}.json`;
+    const json = await readFile(path, 'utf-8');
+    return JSON.parse(json);
 }
 
 function getObjectURL(host, table, id) {
@@ -134,14 +119,14 @@ function getObjectURL(host, table, id) {
 }
 
 function getPageURL(host, table, page) {
-    var url = `${host}/${basePathAPI}/${table}/`;
+    let url = `${host}/${basePathAPI}/${table}/`;
     if (page > 1) {
         url += `?page=${page}`;
     }
     return url;
 }
 
-var relations = {
+const relations = {
     characters: 'people',
     films: 'films',
     homeworld: 'planets',
@@ -155,12 +140,12 @@ var relations = {
 };
 
 function attachHyperlinkKeys(host, table, object) {
-    var url = getObjectURL(host, table, object.id);
-    var newObject = { url };
-    for (var name in object) {
+    const url = getObjectURL(host, table, object.id);
+    const newObject = { url };
+    for (let name in object) {
         if (name !== 'id') {
-            var value = object[name];
-            var relatedTable = relations[name];
+            let value = object[name];
+            let relatedTable = relations[name];
             if (relatedTable) {
                 if (value instanceof Array) {
                     value = value.map(getObjectURL.bind(null, host, relatedTable));

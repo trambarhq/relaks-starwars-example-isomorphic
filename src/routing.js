@@ -15,13 +15,13 @@ class Route {
     }
 
     extractID(url) {
-        var si = url.lastIndexOf('/');
-        var ei;
+        let si = url.lastIndexOf('/');
+        let ei;
         if (si === url.length - 1) {
             ei = si;
             si = url.lastIndexOf('/', ei - 1);
         }
-        var text = url.substring(si + 1, ei);
+        const text = url.substring(si + 1, ei);
         return parseInt(text);
     }
 }
@@ -29,86 +29,86 @@ class Route {
 let routes = {
     'welcome': {
         path: '/',
-        load: async (match) => {
-            match.params.module = await import('pages/welcome-page' /* webpackChunkName: "welcome-page" */);
+        load: (match) => {
+            match.params.module = require('pages/welcome-page');
         }
     },
     'film-list': {
         path: '/films/',
-        load: async (match) => {
-            match.params.module = await import('pages/film-list' /* webpackChunkName: "film-list" */);
+        load: (match) => {
+            match.params.module = require('pages/film-list');
         }
     },
     'film-summary': {
         path: '/films/${id}/',
         params: { id: Number },
-        load: async (match) => {
-            match.params.module = await import('pages/film-page' /* webpackChunkName: "film-page" */);
+        load: (match) => {
+            match.params.module = require('pages/film-page');
         }
     },
     'character-list': {
         path: '/characters/',
-        load: async (match) => {
-            match.params.module = await import('pages/character-list' /* webpackChunkName: "character-list" */);
+        load: (match) => {
+            match.params.module = require('pages/character-list');
         }
     },
     'character-summary': {
         path: '/characters/${id}/',
         params: { id: Number },
-        load: async (match) => {
-            match.params.module = await import('pages/character-page' /* webpackChunkName: "character-page" */);
+        load: (match) => {
+            match.params.module = require('pages/character-page');
         }
     },
     'planet-list': {
         path: '/planets/',
-        load: async (match) => {
-            match.params.module = await import('pages/planet-list' /* webpackChunkName: "planet-list" */);
+        load: (match) => {
+            match.params.module = require('pages/planet-list');
         }
     },
     'planet-summary': {
         path: '/planets/${id}/',
         params: { id: Number },
-        load: async (match) => {
-            match.params.module = await import('pages/planet-page' /* webpackChunkName: "planet-page" */);
+        load: (match) => {
+            match.params.module = require('pages/planet-page');
         }
     },
     'species-list': {
         path: '/species/',
-        load: async (match) => {
-            match.params.module = await import('pages/species-list' /* webpackChunkName: "species-list" */);
+        load: (match) => {
+            match.params.module = require('pages/species-list');
         }
     },
     'species-summary': {
         path: '/species/${id}/',
         params: { id: Number },
-        load: async (match) => {
-            match.params.module = await import('pages/species-page' /* webpackChunkName: "species-page" */);
+        load: (match) => {
+            match.params.module = require('pages/species-page');
         }
     },
     'vehicle-list': {
         path: '/vehicles/',
-        load: async (match) => {
-            match.params.module = await import('pages/vehicle-list' /* webpackChunkName: "vehicle-list" */);
+        load: (match) => {
+            match.params.module = require('pages/vehicle-list');
         }
     },
     'vehicle-summary': {
         path: '/vehicles/${id}/',
         params: { id: Number },
-        load: async (match) => {
-            match.params.module = await import('pages/vehicle-page' /* webpackChunkName: "vehicle-page" */);
+        load: (match) => {
+            match.params.module = require('pages/vehicle-page');
         }
     },
     'starship-list': {
         path: '/starships/',
-        load: async (match) => {
-            match.params.module = await import('pages/starship-list' /* webpackChunkName: "starship-list" */);
+        load: (match) => {
+            match.params.module = require('pages/starship-list');
         }
     },
     'starship-summary': {
         path: '/starship/${id}/',
         params: { id: Number },
-        load: async (match) => {
-            match.params.module = await import('pages/starship-page' /* webpackChunkName: "starship-page" */);
+        load: (match) => {
+            match.params.module = require('pages/starship-page');
         }
     },
 };

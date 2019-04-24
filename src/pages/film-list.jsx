@@ -1,7 +1,7 @@
 import { h, Component } from 'preact';
 import { AsyncComponent } from 'relaks/preact';
-import List from 'widgets/list';
-import Loading from 'widgets/loading';
+import { List } from 'widgets/list';
+import { Loading } from 'widgets/loading';
 
 /** @jsx h */
 
@@ -57,6 +57,4 @@ class FilmListSync extends Component {
 
 export {
     FilmList as default,
-    FilmList,
-    FilmListSync
 };

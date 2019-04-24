@@ -1,7 +1,7 @@
 import { h, Component } from 'preact';
 import { AsyncComponent } from 'relaks/preact';
 import { List } from 'widgets/list';
-import Loading from 'widgets/loading';
+import { Loading } from 'widgets/loading';
 
 /** @jsx h */
 
@@ -77,6 +77,4 @@ class CharacterPageSync extends Component {
 
 export {
     CharacterPage as default,
-    CharacterPage,
-    CharacterPageSync,
 };

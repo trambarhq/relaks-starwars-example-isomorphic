@@ -1,7 +1,7 @@
 import { h, Component } from 'preact';
 import { AsyncComponent } from 'relaks/preact';
-import List from 'widgets/list';
-import Loading from 'widgets/loading';
+import { List } from 'widgets/list';
+import { Loading } from 'widgets/loading';
 
 /** @jsx h */
 
@@ -56,6 +56,4 @@ class SpeciesListSync extends Component {
 
 export {
     SpeciesList as default,
-    SpeciesList,
-    SpeciesListSync
 };
