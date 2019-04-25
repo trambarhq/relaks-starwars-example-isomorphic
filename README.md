@@ -83,12 +83,11 @@ import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest';
 
-const dataSourceBaseURL = '/starwars/api';
 const basePath = '/starwars';
 
 async function render(options) {
     const dataSource = new DjangoDataSource({
-        baseURL: `${options.host}${dataSourceBaseURL}`,
+        baseURL: `${options.host}${basePath}/api`,
         fetchFunc: options.fetch,
     });
     dataSource.activate();
@@ -150,14 +149,13 @@ import { plant } from 'relaks';
 
 window.addEventListener('load', initialize);
 
-const dataSourceBaseURL = '/starwars/api';
 const basePath = '/starwars';
 
 async function initialize(evt) {
     // create data source
     const host = `${location.protocol}//${location.host}`;
     const dataSource = new DjangoDataSource({
-        baseURL: `${host}${dataSourceBaseURL}`,
+        baseURL: `${host}${basePath}/api`,
     });
     dataSource.activate();
 

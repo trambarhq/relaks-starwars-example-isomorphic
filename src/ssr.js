@@ -6,12 +6,11 @@ import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest';
 
-const dataSourceBaseURL = '/starwars/api';
 const basePath = '/starwars';
 
 async function render(options) {
     const dataSource = new DjangoDataSource({
-        baseURL: `${options.host}${dataSourceBaseURL}`,
+        baseURL: `${options.host}${basePath}/api`,
         fetchFunc: options.fetch,
     });
     dataSource.activate();

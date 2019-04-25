@@ -11,7 +11,6 @@ const FrontEnd = require('./client/front-end');
 DNSCache({ enable: true, ttl: 300, cachesize: 100 });
 
 const basePath = FrontEnd.basePath;
-const basePathAPI = `${basePath}/api`;
 const perPage = 10;
 const serverPort = 8080;
 
@@ -19,8 +18,8 @@ const app = Express();
 app.set('json spaces', 2);
 app.use(SpiderDetector.middleware());
 app.use(`${basePath}`, Express.static(`${__dirname}/www`));
-app.get(`${basePathAPI}/:table/:id`, handleObjectRequest);
-app.get(`${basePathAPI}/:table/`, handleListRequest);
+app.get(`${basePath}/api/:table/:id`, handleObjectRequest);
+app.get(`${basePath}/api/:table/`, handleListRequest);
 app.get(`${basePath}/*`, handlePageRequest);
 app.listen(serverPort);
 
@@ -114,11 +113,11 @@ async function loadTable(table) {
 }
 
 function getObjectURL(host, table, id) {
-    return `${host}${basePathAPI}/${table}/${id}/`
+    return `${host}${basePath}/api/${table}/${id}/`
 }
 
 function getPageURL(host, table, page) {
-    let url = `${host}${basePathAPI}/${table}/`;
+    let url = `${host}${basePath}/api/${table}/`;
     if (page > 1) {
         url += `?page=${page}`;
     }
