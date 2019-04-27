@@ -35,8 +35,7 @@ async function handlePageRequest(req, res) {
         let html = await replaceHTMLComment(indexHTMLPath, 'REACT', frontEndHTML);
         if (target === 'hydrate') {
             // add <noscript> tag to redirect to SEO version
-            const meta = `<meta http-equiv=refresh content="0; url=?js=0">`;
-            html += `<noscript>${meta}</noscript>`;
+            html += `<noscript><meta http-equiv=refresh content="0; url=?js=0"></noscript>`;
         }
         res.type('html').send(html);
     } catch (err) {
