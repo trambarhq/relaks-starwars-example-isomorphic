@@ -1,6 +1,6 @@
 {
   "name": "relaks-starwars-example-isomorphic",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "An example of using Relaks to build an isomorphic app",
   "scripts": {
     "watch": "webpack --watch",
