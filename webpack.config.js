@@ -104,4 +104,3 @@ var configs = module.exports = [ serverConfig, clientConfig ];
 if (FS.existsSync('./webpack.debug.js')) {
     configs.map(require('./webpack.debug.js'));
 }
-console.log(configs[0].resolve);
