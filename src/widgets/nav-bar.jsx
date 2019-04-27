@@ -1,9 +1,7 @@
-import { h, Component } from 'preact';
-
-/** @jsx h */
+import React from 'react';
 
 function NavBar(props) {
-    let { route } = props;
+    const { route } = props;
     return (
         <div className="nav-bar">
             <Button pageName="welcome" route={route}>
@@ -31,20 +29,12 @@ function NavBar(props) {
     );
 }
 
-NavBar.displayName = 'NavBar';
-
 function Button(props) {
-    let { route } = props;
-    let linkProps = {
-        className: 'button',
-        href: route.find(props.pageName),
-    };
-    return <a {...linkProps}>{props.children}</a>;
+    const { route, pageName, children } = props;
+    const url = route.find(pageName);
+    return <a className="button" href={url}>{children}</a>;
 }
 
-Button.displayName = 'Button';
-
 export {
-    NavBar as default,
     NavBar
 };

@@ -1,61 +1,34 @@
-import { h, Component } from 'preact';
-import { AsyncComponent } from 'relaks/preact';
-import List from 'widgets/list';
-import Loading from 'widgets/loading';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks';
+import { List } from 'widgets/list';
+import { Loading } from 'widgets/loading';
 
-/** @jsx h */
+async function VehicleList(props) {
+    const { route, swapi } = props;
+    const [ show ] = useProgress();
 
-class VehicleList extends AsyncComponent {
-    static displayName = 'VehicleList';
+    render();
+    const vehicles = await swapi.fetchList('/vehicles/');
+    render();
 
-    /**
-     * Retrieve remote data and render the synchronize half of this component
-     *
-     * @param  {Meanwhile}  meanwhile
-     *
-     * @return {VNode}
-     */
-    async renderAsync(meanwhile) {
-        let { route, swapi } = this.props;
-        let props = {
-            route,
-        };
-        meanwhile.show(<VehicleListSync {...props} />);
-        props.vehicles = await swapi.fetchList('/vehicles/');
-        props.vehicles.more();
-        return <VehicleListSync {...props} />;
-    }
-}
+    vehicles.more();
 
-class VehicleListSync extends Component {
-    static displayName = 'VehicleListSync';
-
-    /**
-     * Render the component, making best effort using what props are given
-     *
-     * @return {VNode}
-     */
-    render() {
-        let { vehicles, route } = this.props;
+    function render() {
         if (!vehicles) {
-            return <Loading />;
+            show(<Loading />);
+        } else {
+            show(
+                <div>
+                    <h1>Vehicles</h1>
+                    <List items={vehicles} field="name" pageName="vehicle-summary" route={route} />
+                </div>
+            );
         }
-        let listProps = {
-            items: vehicles,
-            pageName: 'vehicle-summary',
-            route,
-        };
-        return (
-            <div>
-                <h1>Vehicles</h1>
-                <List {...listProps} />
-            </div>
-        );
     }
 }
+
+const component = Relaks.memo(VehicleList);
 
 export {
-    VehicleList as default,
-    VehicleList,
-    VehicleListSync
+    component as default,
 };

@@ -1,62 +1,38 @@
-import 'preact/devtools';
-import { h, render } from 'preact';
+import { createElement } from 'react';
+import { hydrate, render } from 'react-dom';
 import { FrontEnd } from 'front-end';
 import { routes } from 'routing';
 import DjangoDataSource from 'relaks-django-data-source';
 import RouteManager from 'relaks-route-manager';
-import { harvest } from 'relaks-harvest/preact';
-import { plant } from 'relaks/preact';
+import { harvest } from 'relaks-harvest';
+import { plant } from 'relaks';
 
-const dataSourceBaseURL = '/starwars/api';
-const pageBasePath = '/starwars';
+window.addEventListener('load', initialize);
 
-if (typeof(window) === 'object') {
-    async function initialize(evt) {
-        // create data source
-        let host = `${location.protocol}//${location.host}`;
-        let dataSource = new DjangoDataSource({
-            baseURL: `${host}${dataSourceBaseURL}`,
-        });
-        dataSource.activate();
+const basePath = '/starwars';
 
-        // create route manager
-        let routeManager = new RouteManager({
-            routes,
-            basePath: pageBasePath,
-            preloadingDelay: 2000,
-        });
-        routeManager.activate();
-        await routeManager.start();
+async function initialize(evt) {
+    // create data source
+    const host = `${location.protocol}//${location.host}`;
+    const dataSource = new DjangoDataSource({
+        baseURL: `${host}${basePath}/api`,
+    });
+    dataSource.activate();
 
-        let container = document.getElementById('react-container');
-        let ssrElement = h(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
-        let seeds = await harvest(ssrElement, { seeds: true });
-        plant(seeds);
-        render(ssrElement, container, container.firstChild);
+    // create route manager
+    const routeManager = new RouteManager({
+        routes,
+        basePath,
+    });
+    routeManager.activate();
+    await routeManager.start();
 
-        let csrElement = h(FrontEnd, { dataSource, routeManager });
-        render(csrElement, container, container.firstChild);
-    }
+    const container = document.getElementById('react-container');
+    const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
+    const seeds = await harvest(ssrElement, { seeds: true });
+    plant(seeds);
+    hydrate(ssrElement, container);
 
-    window.addEventListener('load', initialize);
-} else {
-    async function serverSideRender(options) {
-        let dataSource = new DjangoDataSource({
-            baseURL: `${options.host}${dataSourceBaseURL}`,
-            fetchFunc: options.fetch,
-        });
-        dataSource.activate();
-
-        let routeManager = new RouteManager({
-            routes,
-            basePath: pageBasePath,
-        });
-        routeManager.activate();
-        await routeManager.start(options.path);
-
-        let ssrElement = h(FrontEnd, { dataSource, routeManager, ssr: options.target });
-        return harvest(ssrElement);
-    }
-
-    exports.render = serverSideRender;
+    const csrElement = createElement(FrontEnd, { dataSource, routeManager });
+    render(csrElement, container);
 }

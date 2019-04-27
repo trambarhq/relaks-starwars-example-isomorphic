@@ -1,9 +1,8 @@
-import { h, Component } from 'preact';
-
-/** @jsx h */
+import React from 'react';
 
 function List(props) {
-    let { route, urls, items, field, pageName } = props;
+    const { route, field, pageName } = props;
+    let { urls, items } = props;
     if (urls) {
         // accept single URL and object
         if (typeof(urls) === 'string') {
@@ -25,31 +24,25 @@ function List(props) {
     if (items.length === 0) {
         return <ul className="empty"><li><span>none</span></li></ul>;
     }
-    return (
-        <ul>
-        {
-            items.map((item) => {
-                let id = route.extractID(item.url);
-                let url = route.find(pageName, { id });
-                let text = item.pending ? '...' : item[field];
-                let linkProps = {
-                    href: url,
-                    className: (item.pending) ? 'pending' : undefined,
-                };
-                return <li><a {...linkProps}>{text}</a></li>;
-            })
-        }
-        </ul>
-    );
+    return <ul>{items.map(renderItem)}</ul>;
+
+    function renderItem(item, i) {
+        const id = route.extractID(item.url);
+        const url = route.find(pageName, { id });
+        const text = (item.pending) ? '...' : item[field];
+        const className = (item.pending) ? 'pending' : undefined;
+        return (
+            <li key={i}>
+                <a className={className} href={url}>{text}</a>
+            </li>
+        );
+    }
 }
 
 List.defaultProps = {
     field: 'name'
 };
 
-List.displayName = 'List';
-
 export {
-    List as default,
     List
 };

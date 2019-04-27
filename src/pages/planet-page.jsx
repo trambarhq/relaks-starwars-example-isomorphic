@@ -1,71 +1,47 @@
-import { h, Component } from 'preact';
-import { AsyncComponent } from 'relaks/preact';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks';
 import { List } from 'widgets/list';
-import Loading from 'widgets/loading';
+import { Loading } from 'widgets/loading';
 
-/** @jsx h */
+async function PlanetPage(props) {
+    const { route, swapi } = props;
+    const [ show ] = useProgress();
 
-class PlanetPage extends AsyncComponent {
-    static displayName = 'PlanetPage';
+    render();
+    const planet = await swapi.fetchOne(`/planets/${route.params.id}/`);
+    render();
+    const films = await swapi.fetchMultiple(planet.films, { minimum: '60%' });
+    render();
+    const residents = await swapi.fetchMultiple(planet.residents, { minimum: '60%' });
+    render();
 
-    /**
-     * Retrieve remote data and render the synchronize half of this component
-     *
-     * @param  {Meanwhile}  meanwhile
-     *
-     * @return {VNode}
-     */
-    async renderAsync(meanwhile) {
-        let { route, swapi } = this.props;
-        let props = {
-            route,
-        };
-        meanwhile.show(<PlanetPageSync {...props} />);
-        props.planet = await swapi.fetchOne(`/planets/${route.params.id}/`);
-        meanwhile.show(<PlanetPageSync {...props} />);
-        props.films = await swapi.fetchMultiple(props.planet.films, { minimum: '60%' });
-        meanwhile.show(<PlanetPageSync {...props} />);
-        props.residents = await swapi.fetchMultiple(props.planet.residents, { minimum: '60%' });
-        meanwhile.show(<PlanetPageSync {...props} />);
-        return <PlanetPageSync {...props} />;
-    }
-}
-
-class PlanetPageSync extends Component {
-    static displayName = 'PlanetPageSync';
-
-    /**
-     * Render the component, making best effort using what props are given
-     *
-     * @return {VNode}
-     */
-    render() {
-        let { route, planet, films, residents } = this.props;
+    function render() {
         if (!planet) {
-            return <Loading />;
+            show(<Loading />);
+        } else {
+            show(
+                <div>
+                    <h1>{planet.name}</h1>
+                    <div>Diameter: {planet.diameter} km</div>
+                    <div>Rotation period: {planet.rotation_period} hr</div>
+                    <div>Orbital period: {planet.orbital_period} days</div>
+                    <div>Climate: {planet.climate}</div>
+                    <div>Gravity: {planet.gravity}</div>
+                    <div>Terrain: {planet.terrain}</div>
+                    <div>Surface water: {planet.surface_water}</div>
+                    <div>Population: {planet.population}</div>
+                    <h2>Residents</h2>
+                    <List urls={planet.residents} items={residents} pageName="character-summary" route={route} />
+                    <h2>Films</h2>
+                    <List urls={planet.films} items={films} field="title" pageName="film-summary" route={route} />
+                </div>
+            );
         }
-        return (
-            <div>
-                <h1>{planet.name}</h1>
-                <div>Diameter: {planet.diameter} km</div>
-                <div>Rotation period: {planet.rotation_period} hr</div>
-                <div>Orbital period: {planet.orbital_period} days</div>
-                <div>Climate: {planet.climate}</div>
-                <div>Gravity: {planet.gravity}</div>
-                <div>Terrain: {planet.terrain}</div>
-                <div>Surface water: {planet.surface_water}</div>
-                <div>Population: {planet.population}</div>
-                <h2>Residents</h2>
-                <List urls={planet.residents} items={residents} pageName="character-summary" route={route} />
-                <h2>Films</h2>
-                <List urls={planet.films} items={films} field="title" pageName="film-summary" route={route} />
-            </div>
-        );
     }
 }
+
+const component = Relaks.memo(PlanetPage);
 
 export {
-    PlanetPage as default,
-    PlanetPage,
-    PlanetPageSync,
+    component as default,
 };

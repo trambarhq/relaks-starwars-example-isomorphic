@@ -1,61 +1,34 @@
-import { h, Component } from 'preact';
-import { AsyncComponent } from 'relaks/preact';
-import List from 'widgets/list';
-import Loading from 'widgets/loading';
+import React from 'react';
+import Relaks, { useProgress } from 'relaks';
+import { List } from 'widgets/list';
+import { Loading } from 'widgets/loading';
 
-/** @jsx h */
+async function PlanetList(props) {
+    const { route, swapi } = props;
+    const [ show ] = useProgress();
 
-class PlanetList extends AsyncComponent {
-    static displayName = 'PlanetList';
+    render();
+    const planets = await swapi.fetchList('/planets/');
+    render();
 
-    /**
-     * Retrieve remote data and render the synchronize half of this component
-     *
-     * @param  {Meanwhile}  meanwhile
-     *
-     * @return {VNode}
-     */
-    async renderAsync(meanwhile) {
-        let { route, swapi } = this.props;
-        let props = {
-            route,
-        };
-        meanwhile.show(<PlanetListSync {...props} />);
-        props.planets = await swapi.fetchList('/planets/');
-        props.planets.more();
-        return <PlanetListSync {...props} />;
-    }
-}
+    planets.more();
 
-class PlanetListSync extends Component {
-    static displayName = 'PlanetListSync';
-
-    /**
-     * Render the component, making best effort using what props are given
-     *
-     * @return {VNode}
-     */
-    render() {
-        let { planets, route } = this.props;
+    function render() {
         if (!planets) {
-            return <Loading />;
+            show(<Loading />);
+        } else {
+            show(
+                <div>
+                    <h1>Planets</h1>
+                    <List items={planets} field="name" pageName="planet-summary" route={route} />
+                </div>
+            );
         }
-        let listProps = {
-            items: planets,
-            pageName: 'planet-summary',
-            route,
-        };
-        return (
-            <div>
-                <h1>Planets</h1>
-                <List {...listProps} />
-            </div>
-        );
     }
 }
+
+const component = Relaks.memo(PlanetList);
 
 export {
-    PlanetList as default,
-    PlanetList,
-    PlanetListSync
+    component as default,
 };
