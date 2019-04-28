@@ -1,6 +1,6 @@
 Relaks Star Wars Example - Isomorphic
 -------------------------------------
-Welcome to part three of the Relaks Starwars saga. In [part one](https://github.com/chung-leong/relaks-starwars-example), we created a very basic page that fetch data from [SWAPI](https://swapi.co/). In [part two](https://github.com/chung-leong/relaks-starwars-example-sequel), we expanded it to something that resembles a real-world website. Now, we'll go one step further by making the front-end isomorphic.
+Welcome to part three of the Relaks Starwars saga. In [part one](https://github.com/trambarhq/relaks-starwars-example), we created a very basic page that fetch data from [SWAPI](https://swapi.co/). In [part two](https://github.com/trambarhq/relaks-starwars-example-sequel), we expanded it to something that resembles a real-world website. Now, we'll go one step further by making the front-end isomorphic.
 
 An isomorphic React front-end can render a page on either a web browser or a server running Node.js. The purpose of server-side rendering (SSR) is first and foremost search engine optimization (SEO). Website crawlers are much better at indexing static HTML pages than JavaScript-generated pages. Providing a static version of your site improves the chance that people will find it.
 
@@ -12,9 +12,9 @@ With proper page caching, time to first impression can match that of a static HT
 
 ## Live demo
 
-You can see the code in action [here](https://trambar.io/starwars-react/characters/). When the page is rendered on the server side, it has a reddish background color. The color is removed once the client takes over. This can happen in less than a second as the front-end is fairly small. You might want to activate bandwidth throttling to slow things down a bit. Hit the browser's refresh button to to see the SSR version again.
+You can see the code in action [here](https://trambar.io/starwars/characters/). When the page is rendered on the server side, it has a reddish background color. The color is removed once the client takes over. This can happen in less than a second as the front-end is fairly small. You might want to activate bandwidth throttling to slow things down a bit. Hit the browser's refresh button to to see the SSR version again.
 
-[![Screenshot](docs/img/screenshot.png)](https://trambar.io/starwars-react/characters/)
+[![Screenshot](docs/img/screenshot.png)](https://trambar.io/starwars/characters/)
 
 If you wish to see the SEO version, disable JavaScript for the site. On Chrome, you can do this by clicking the lock icon next to the page URL and select "Site settings".
 
@@ -24,11 +24,11 @@ To see the code running in debug mode, first clone this repository. In the worki
 
 ## SSR and Relaks
 
-Conceptually, enabling SSR on a front-end using Relaks is very simple: We just need to wait for all promises to be fulfilled. The [relaks-harvest](https://github.com/chung-leong/relaks-harvest) library is designed exactly for this task. Given a `ReactElement`, `harvest()` will recursively render all child elements.  Once everything is rendered, it returns asynchronously a tree containing only HTML and text nodes. This tree can then be passed to [`ReactDOMServer.renderToString()`](https://reactjs.org/docs/react-dom-server.html#rendertostring).
+Conceptually, enabling SSR on a front-end using Relaks is very simple: We just need to wait for all promises to be fulfilled. The [relaks-harvest](https://github.com/trambarhq/relaks-harvest) library is designed exactly for this task. Given a `ReactElement`, `harvest()` will recursively render all child elements.  Once everything is rendered, it returns asynchronously a tree containing only HTML and text nodes. This tree can then be passed to [`ReactDOMServer.renderToString()`](https://reactjs.org/docs/react-dom-server.html#rendertostring).
 
 ## Adjustments to WebPack configuration
 
-The first thing we need to do to enable SSR is to add a new build target in our WebPack configuration. By default, WebPack generates code suitable for web-browsers. We need to ask WebPack to prepare a separate build for a Node.js environment. In [webpack.config.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/react/webpack.config.js#L96), we change the export statement to the following:
+The first thing we need to do to enable SSR is to add a new build target in our WebPack configuration. By default, WebPack generates code suitable for web-browsers. We need to ask WebPack to prepare a separate build for a Node.js environment. In [webpack.config.js](https://github.com/trambarhq/relaks-starwars-example-isomorphic/blob/master/webpack.config.js#L97), we change the export statement to the following:
 
 ```javascript
 module.exports = [ serverConfig, clientConfig ];
@@ -72,7 +72,7 @@ Another thing we need to do is extract CSS rules to a separate .css file instead
 
 ## Client-side code changes
 
-The source file [ssr.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/react/src/ssr.js) contains the bootstrap code for our Node.js build. It exports the function `render()`. The function will be called by our server code.
+The source file [ssr.js](https://github.com/trambarhq/relaks-starwars-example-isomorphic/blob/master/src/ssr.js) contains the bootstrap code for our Node.js build. It exports the function `render()`. The function will be called by our server code.
 
 ```javascript
 import { createElement } from 'react';
@@ -188,7 +188,7 @@ The second `FrontEnd` element is used to turn off the `ssr` flag.
 
 ## Adjustments to HTML template
 
-We change the `body` element in [index.html](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/react/src/index.html) from
+We change the `body` element in [index.html](https://github.com/trambarhq/relaks-starwars-example-isomorphic/blob/master/src/index.html) from
 
 ```html
 <body>
@@ -207,7 +207,7 @@ The class name allows us to style the page a little differently depending on whe
 
 ## Server code
 
-Our server code consists of a single script: [index.js](https://github.com/chung-leong/relaks-starwars-example-isomorphic/blob/react/server/index.js). It uses [Express](https://expressjs.com/) to handle page requests. The following function is responsible for generating SSR pages:
+Our server code consists of a single script: [index.js](https://github.com/trambarhq/relaks-starwars-example-isomorphic/blob/master/server/index.js). It uses [Express](https://expressjs.com/) to handle page requests. The following function is responsible for generating SSR pages:
 
 ```javascript
 async function handlePageRequest(req, res) {
@@ -239,14 +239,14 @@ The remaining code deals mainly with data retrieval. While in the previous examp
 
 ## Usage scenarios
 
-One thing you might notice while looking at the [example](https://trambar.io/starwars-react/films/) is how clicking on a link brings up the page almost instantaneously. This is because we must fetch a complete object even when we only need just one of its properties. To render the **Films** page, we only need the films' titles. We end up fetching all the information concerning them. The extra information enables us to display something immediately when the user subsequently clicks on a link. The inefficiency of a REST API actually works to our advantage by acting as a data-prefetch mechanism.
+One thing you might notice while looking at the [example](https://trambar.io/starwars/films/) is how clicking on a link brings up the page almost instantaneously. This is because we must fetch a complete object even when we only need just one of its properties. To render the **Films** page, we only need the films' titles. We end up fetching all the information concerning them. The extra information enables us to display something immediately when the user subsequently clicks on a link. The inefficiency of a REST API actually works to our advantage by acting as a data-prefetch mechanism.
 
 The dynamic described above can be especially useful at a content-heavy website. Imagine you're building a news portal. The front page will link to 20, 30 stories. For each story, a title and a short blurb is shown. Your REST API always returns complete objects. The full texts of the story therefore get fetched as well. If text is around 20 KB in size, your page wouldn't be ready until 400-600 KB have been downloaded. Visitors would be staring at a loading animation in the meantime if yours is a pure client-side solution. Employing server-side rendering masks this transfer time. Since the server will send only what's actually shown (titles and short blurbs), the static page will load quickly. While the visitors are looking at the list and contemplating which story they wish to read, stories are silently transferred to their computers. When they finally decides to click on one, it'll be there already. The story will appear immediately. If he doesn't like it, he can quickly go back to the list and choose another. The lack of a loading time penalty means visitors will be more willing to give a story a chance. That in turns helps increase page views at your site.
 
 ## Final words
 
-We've reached the end of our trilogy of examples. Starting out with a very crude page we managed to build something with a certain measure of sophistication. I hope you managed to follow the code without difficulty. That's the goal of Relaks: making it easy to program with React. If there's anything unclear, please [let me know](https://github.com/chung-leong/relaks-starwars-example-isomorphic/issues).
+We've reached the end of our trilogy of examples. Starting out with a very crude page we managed to build something with a certain measure of sophistication. I hope you managed to follow the code without difficulty. That's the goal of Relaks: making it easy to program with React. If there's anything unclear, please [let me know](https://github.com/trambarhq/relaks-starwars-example-isomorphic/issues).
 
-The Star Wars API examples only deal with data retrieval. If you wish to see an example involving data modification and user authentication, please consult the [Django todo list example](https://github.com/chung-leong/relaks-django-todo-example).
+The Star Wars API examples only deal with data retrieval. If you wish to see an example involving data modification and user authentication, please consult the [Django todo list example](https://github.com/trambarhq/relaks-django-todo-example).
 
 For a more extensive demonstration of server-side rendering, check out the [WordPress example](https://github.com/trambarhq/relaks-wordpress-example).
