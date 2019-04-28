@@ -5,7 +5,7 @@ WORKDIR /opt/starwars
 # install dependencies
 COPY package.json ./
 COPY package-lock.json ./
-RUN npm install strip-ansi -g && npm install -g npm@6.3 && npm ci --only=production
+RUN npm install -g npm@latest && npm ci --only=production
 
 # copy code
 COPY server ./
