@@ -35,7 +35,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "regenerator-runtime": "^0.13.2",
-    "relaks": "^2.0.0",
+    "relaks": "^2.0.1",
     "relaks-django-data-source": "^0.0.13",
     "relaks-harvest": "^2.0.0",
     "relaks-route-manager": "^0.0.21",
