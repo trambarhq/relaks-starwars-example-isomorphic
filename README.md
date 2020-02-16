@@ -37,32 +37,30 @@ module.exports = [ serverConfig, clientConfig ];
 The variable `clientConfig` holds the configuration for the browser build. The variable `serverConfig` meanwhile holds the configuration for the Node.js build:
 
 ```JavaScript
-var serverConfig = {
-    mode: clientConfig.mode,
-    context: clientConfig.context,
-    entry: './ssr',
-    target: 'node',
-    output: {
-        path: Path.resolve('./server/client'),
-        filename: 'front-end.js',
-        chunkFilename: '[name].js',
-        libraryTarget: 'commonjs2',
-        publicPath: '/starwars',
-    },
-    resolve: clientConfig.resolve,
-    module: clientConfig.module,
-    plugins: [
-        new NamedChunksPlugin,
-        new HtmlWebpackPlugin({
-            template: Path.resolve(`./src/index.html`),
-            filename: Path.resolve(`./server/client/index.html`),
-        }),
-        new MiniCSSExtractPlugin({
-            filename: "[name].css",
-            chunkFilename: "[id].css"
-        }),
-    ],
-    devtool: clientConfig.devtool,
+const serverConfig = {
+  mode: clientConfig.mode,
+  context: clientConfig.context,
+  entry: './ssr',
+  target: 'node',
+  output: {
+    path: Path.resolve('./server/client'),
+    filename: 'front-end.js',
+    chunkFilename: '[name].js',
+    libraryTarget: 'commonjs2',
+    publicPath: '/starwars',
+  },
+  module: clientConfig.module,
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: Path.resolve(`./src/index.html`),
+      filename: Path.resolve(`./server/client/index.html`),
+    }),
+    new MiniCSSExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css"
+    }),
+  ],
+  devtool: clientConfig.devtool,
 };
 ```
 
@@ -77,37 +75,37 @@ The source file [ssr.js](https://github.com/trambarhq/relaks-starwars-example-is
 ```javascript
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
-import { FrontEnd } from 'front-end';
-import { routes } from 'routing';
-import DjangoDataSource from 'relaks-django-data-source';
-import RouteManager from 'relaks-route-manager';
+import { DataSource } from 'relaks-django-data-source';
+import { RouteManager } from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest';
+import { FrontEnd } from './front-end.jsx';
+import { routes } from './routing.js';
 
 const basePath = '/starwars';
 
 async function render(options) {
-    const dataSource = new DjangoDataSource({
-        baseURL: `${options.host}${basePath}/api`,
-        fetchFunc: options.fetch,
-    });
-    dataSource.activate();
+  const dataSource = new DataSource({
+    baseURL: `${options.host}${basePath}/api`,
+    fetchFunc: options.fetch,
+  });
+  dataSource.activate();
 
-    const routeManager = new RouteManager({
-        routes,
-        basePath,
-    });
-    routeManager.activate();
-    await routeManager.start(options.path);
+  const routeManager = new RouteManager({
+    routes,
+    basePath,
+  });
+  routeManager.activate();
+  await routeManager.start(options.path);
 
-    const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: options.target });
-    const rootNode = await harvest(ssrElement);
-    const html = renderToString(rootNode);
-    return html;
+  const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: options.target });
+  const rootNode = await harvest(ssrElement);
+  const html = renderToString(rootNode);
+  return html;
 }
 
 export {
-    render,
-    basePath,
+  render,
+  basePath,
 };
 ```
 
@@ -119,17 +117,17 @@ The `ssr` prop given to `FrontEnd` has two possible values: `seo` and `hydrate`.
 
 ```javascript
 fetchList(url, options) {
-    if (this.ssr === 'seo') {
-        options = Object.assign({}, options, { minimum: '100%' });
-    }
-    return this.dataSource.fetchList(url, options);
+  if (this.ssr === 'seo') {
+    options = Object.assign({}, options, { minimum: '100%' });
+  }
+  return this.dataSource.fetchList(url, options);
 }
 
 fetchMultiple(urls, options) {
-    if (this.ssr === 'seo') {
-        options = Object.assign({}, options, { minimum: '100%' });
-    }
-    return this.dataSource.fetchMultiple(urls, options);
+  if (this.ssr === 'seo') {
+    options = Object.assign({}, options, { minimum: '100%' });
+  }
+  return this.dataSource.fetchMultiple(urls, options);
 }
 ```
 
@@ -140,41 +138,41 @@ Our client-side bootstrap code looks more or less as before:
 ```javascript
 import { createElement } from 'react';
 import { hydrate, render } from 'react-dom';
-import { FrontEnd } from 'front-end';
-import { routes } from 'routing';
-import DjangoDataSource from 'relaks-django-data-source';
-import RouteManager from 'relaks-route-manager';
+import { DataSource } from 'relaks-django-data-source';
+import { RouteManager } from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest';
 import { plant } from 'relaks';
+import { FrontEnd } from './front-end.jsx';
+import { routes } from './routing.js';
 
 window.addEventListener('load', initialize);
 
 const basePath = '/starwars';
 
 async function initialize(evt) {
-    // create data source
-    const host = `${location.protocol}//${location.host}`;
-    const dataSource = new DjangoDataSource({
-        baseURL: `${host}${basePath}/api`,
-    });
-    dataSource.activate();
+  // create data source
+  const host = `${location.protocol}//${location.host}`;
+  const dataSource = new DataSource({
+    baseURL: `${host}${basePath}/api`,
+  });
+  dataSource.activate();
 
-    // create route manager
-    const routeManager = new RouteManager({
-        routes,
-        basePath,
-    });
-    routeManager.activate();
-    await routeManager.start();
+  // create route manager
+  const routeManager = new RouteManager({
+    routes,
+    basePath,
+  });
+  routeManager.activate();
+  await routeManager.start();
 
-    const container = document.getElementById('react-container');
-    const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
-    const seeds = await harvest(ssrElement, { seeds: true });
-    plant(seeds);
-    hydrate(ssrElement, container);
+  const container = document.getElementById('react-container');
+  const ssrElement = createElement(FrontEnd, { dataSource, routeManager, ssr: 'hydrate' });
+  const seeds = await harvest(ssrElement, { seeds: true });
+  plant(seeds);
+  hydrate(ssrElement, container);
 
-    const csrElement = createElement(FrontEnd, { dataSource, routeManager });
-    render(csrElement, container);
+  const csrElement = createElement(FrontEnd, { dataSource, routeManager });
+  render(csrElement, container);
 }
 ```
 
@@ -192,14 +190,14 @@ We change the `body` element in [index.html](https://github.com/trambarhq/relaks
 
 ```html
 <body>
-    <div id="react-container"></div>
+  <div id="react-container"></div>
 </body>
 ```
 to
 
 ```html
 <body class="ssr">
-    <div id="react-container"><!--REACT--></div>
+  <div id="react-container"><!--REACT--></div>
 </body>
 ```
 
@@ -211,23 +209,23 @@ Our server code consists of a single script: [index.js](https://github.com/tramb
 
 ```javascript
 async function handlePageRequest(req, res) {
-    try {
-        const host = getHostLocation(req);
-        const path = req.url;
-        const noScript = (req.query.js === '0');
-        const target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
-        const options = { host, path, target, fetch: CrossFetch };
-        const frontEndHTML = await FrontEnd.render(options);
-        const indexHTMLPath = `${__dirname}/client/index.html`;
-        let html = await replaceHTMLComment(indexHTMLPath, 'REACT', frontEndHTML);
-        if (target === 'hydrate') {
-            // add <noscript> tag to redirect to SEO version
-            html += `<noscript><meta http-equiv=refresh content="0; url=?js=0"></noscript>`;
-        }
-        res.type('html').send(html);
-    } catch (err) {
-        handleRequestError(res, err);
+  try {
+    const host = getHostLocation(req);
+    const path = req.url;
+    const noScript = (req.query.js === '0');
+    const target = (req.isSpider() || noScript) ? 'seo' : 'hydrate';
+    const options = { host, path, target, fetch: CrossFetch };
+    const frontEndHTML = await FrontEnd.render(options);
+    const indexHTMLPath = `${__dirname}/client/index.html`;
+    let html = await replaceHTMLComment(indexHTMLPath, 'REACT', frontEndHTML);
+    if (target === 'hydrate') {
+      // add <noscript> tag to redirect to SEO version
+      html += `<noscript><meta http-equiv=refresh content="0; url=?js=0"></noscript>`;
     }
+    res.type('html').send(html);
+  } catch (err) {
+    handleRequestError(res, err);
+  }
 }
 ```
 

@@ -1,11 +1,11 @@
 import { createElement } from 'react';
 import { hydrate, render } from 'react-dom';
-import { FrontEnd } from 'front-end';
-import { routes } from 'routing';
-import DjangoDataSource from 'relaks-django-data-source';
-import RouteManager from 'relaks-route-manager';
+import { DataSource } from 'relaks-django-data-source';
+import { RouteManager } from 'relaks-route-manager';
 import { harvest } from 'relaks-harvest';
 import { plant } from 'relaks';
+import { FrontEnd } from './front-end.jsx';
+import { routes } from './routing.js';
 
 window.addEventListener('load', initialize);
 
@@ -14,7 +14,7 @@ const basePath = '/starwars';
 async function initialize(evt) {
     // create data source
     const host = `${location.protocol}//${location.host}`;
-    const dataSource = new DjangoDataSource({
+    const dataSource = new DataSource({
         baseURL: `${host}${basePath}/api`,
     });
     dataSource.activate();
