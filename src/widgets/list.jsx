@@ -1,6 +1,6 @@
 import React from 'react';
 
-function List(props) {
+export function List(props) {
   const { route, field, pageName } = props;
   let { urls, items } = props;
   if (urls) {
@@ -41,8 +41,4 @@ function List(props) {
 
 List.defaultProps = {
   field: 'name'
-};
-
-export {
-  List
 };

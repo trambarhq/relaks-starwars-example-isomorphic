@@ -1,6 +1,6 @@
 import React from 'react';
 
-function NavBar(props) {
+export function NavBar(props) {
   const { route } = props;
   return (
     <div className="nav-bar">
@@ -34,7 +34,3 @@ function Button(props) {
   const url = route.find(pageName);
   return <a className="button" href={url}>{children}</a>;
 }
-
-export {
-  NavBar
-};

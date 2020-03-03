@@ -28,6 +28,7 @@ const clientConfig = {
           ],
           plugins: [
             '@babel/transform-runtime',
+            'relaks/transform-memo',
           ]
         }
       },

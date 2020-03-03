@@ -5,7 +5,7 @@ import { Route } from './routing.js';
 import { NavBar } from './widgets/nav-bar.jsx';
 import './style.scss';
 
-function FrontEnd(props) {
+export function FrontEnd(props) {
   const { routeManager, dataSource, ssr } = props;
   const [ routeChanged, setRouteChanged ] = useEventTime();
   const [ dataChanged, setDataChanged ] = useEventTime();
@@ -42,7 +42,3 @@ function FrontEnd(props) {
     </div>
   );
 }
-
-export {
-  FrontEnd
-};

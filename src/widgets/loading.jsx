@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Loading() {
+export function Loading() {
   return (
     <div className="loading">
       <div>
@@ -9,7 +9,3 @@ function Loading() {
     </div>
   );
 }
-
-export {
-  Loading
-};
