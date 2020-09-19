@@ -1,6 +1,6 @@
 Relaks Star Wars Example - Isomorphic
 -------------------------------------
-Welcome to part three of the Relaks Starwars saga. In [part one](https://github.com/trambarhq/relaks-starwars-example), we created a very basic page that fetch data from [SWAPI](https://swapi.co/). In [part two](https://github.com/trambarhq/relaks-starwars-example-sequel), we expanded it to something that resembles a real-world website. Now, we'll go one step further by making the front-end isomorphic.
+Welcome to part three of the Relaks Starwars saga. In [part one](https://github.com/trambarhq/relaks-starwars-example), we created a very basic page that fetch data from [SWAPI](https://swapi.dev/). In [part two](https://github.com/trambarhq/relaks-starwars-example-sequel), we expanded it to something that resembles a real-world website. Now, we'll go one step further by making the front-end isomorphic.
 
 An isomorphic React front-end can render a page on either a web browser or a server running Node.js. The purpose of server-side rendering (SSR) is first and foremost search engine optimization (SEO). Website crawlers are much better at indexing static HTML pages than JavaScript-generated pages. Providing a static version of your site improves the chance that people will find it.
 

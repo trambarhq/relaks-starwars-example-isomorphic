@@ -1,8 +1,8 @@
 const FS = require('fs');
-const DataSource = require('relaks-django-data-source');
+const DataSource = require('relaks-django-data-source').default;
 global.fetch = require('cross-fetch');
 
-const baseURL = 'https://swapi.co/api';
+const baseURL = 'https://swapi.dev/api';
 const tables = [
   'people',
   'films',
