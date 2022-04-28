@@ -41,7 +41,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "cross-fetch": "^3.0.6",
+    "cross-fetch": "^3.1.5",
     "dnscache": "^1.0.2",
     "express": "^4.17.1",
     "spider-detector": "^2.0.0"
