@@ -43,7 +43,7 @@
   "dependencies": {
     "cross-fetch": "^3.0.6",
     "dnscache": "^1.0.2",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "spider-detector": "^2.0.0"
   }
 }
